@@ -16,6 +16,18 @@
       {
         "command": "unicorntrack.helloWorld",
         "title": "Hello World"
+      },
+      {
+        "command": "unicorntrack.track",
+        "title": "Track"
+      },
+      {
+        "command": "unicorntrack.input",
+        "title": "Input"
+      },
+      {
+        "command": "unicorntrack.move",
+        "title": "Move"
       }
     ]
   },
