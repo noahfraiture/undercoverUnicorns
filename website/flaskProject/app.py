@@ -47,7 +47,7 @@ def login():
             #usr = users_scores(user, 0, 0)
             #db.session.add(usr)
             #db.session.commit()
-            flash(f"No user named {user}", "info")
+            flash(f"No user named {user}")
             return render_template("login.html")
         flash("Succesfully logged in", "info")
         return redirect(url_for("user"))
@@ -72,7 +72,7 @@ def user():
 
         return render_template("user.html", user_name=user_name, score=score, credit=credit)
     else:
-        return render_template("login.html")
+        return redirect(url_for("login"))
 
 
 

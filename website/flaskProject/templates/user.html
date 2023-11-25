@@ -1,20 +1,17 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>User Dashboard</title>
-</head>
-<body>
-    {% with messages = get_flashed_messages() %}
-        {% if messages %}
-            {% for message in messages %}
-                <p>{{ message }}</p>
-            {% endfor %}
-        {% endif %}
-    {% endwith %}
+{% extends "base.html" %}
+
+{%  block title %}User Dashboard{% endblock %}
+
+{%  block content %}
+    {% for message in get_flashed_messages() %}
+        <div class="alert alert-primary alert-dismissible fade show" role="alert">
+          {{ message }}
+          <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+    {% endfor %}
     <h1>Welcome, {{ user_name }}!</h1>
     <p>Your current score: {{ score }}</p>
     <p>Your current ballance: {{ credit }}</p>
-</body>
-</html>
+{% endblock %}
