@@ -31,10 +31,10 @@
             </tr>
         </thead>
         <tbody>
-            {% for name, score in contestants %}
+            {% for contestant in contestants %}
                 <tr>
-                    <td>{{ name }}</td>
-                    <td>{{ score }}</td>
+                    <td>{{ contestant.name }}</td>
+                    <td>{{ contestant.score }}</td>
                 </tr>
             {% endfor %}
         </tbody>

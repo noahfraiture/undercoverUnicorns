@@ -2,7 +2,8 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>ffice Olympics account</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Dashboard</title>
 </head>
 <body>
     {% with messages = get_flashed_messages() %}
@@ -12,10 +13,8 @@
             {% endfor %}
         {% endif %}
     {% endwith %}
-    <p>Welcom to the office olympics !</p>
-    <form action="#" method="POST">
-        <input type="email" name="email" placeholder="Your email" value="{{ email if email }}"/>
-        <input type="submit" value="submit" \>
-    </form>
+    <h1>Welcome, {{ user_name }}!</h1>
+    <p>Your current score: {{ score }}</p>
+    <p>Your current ballance: {{ credit }}</p>
 </body>
 </html>

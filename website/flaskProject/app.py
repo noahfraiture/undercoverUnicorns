@@ -1,12 +1,25 @@
-from flask import Flask, redirect, url_for, render_template, request, session, flash
+from flask import Flask, redirect, url_for, render_template, request, session, flash, jsonify
 from datetime import timedelta
-
-# import sqlalchemy
+from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
 app.secret_key = "IDontKnowWhatKindOfKeyToPut"
 app.permanent_session_lifetime = timedelta(days=1)
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///usersscores.sqlite3'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] =False
+db = SQLAlchemy(app)
 scores = {}
+
+class users_scores(db.Model):
+    _id = db.Column("id", db.Integer, primary_key=True)
+    name = db.Column("name", db.String(100))
+    score = db.Column("score", db.Integer)
+    credit = db.Column("credit", db.Integer)
+
+    def __init__(self, name, score, credit):
+        self.name = name
+        self.score = score
+        self.credit = credit
 
 
 @app.route('/')
@@ -16,8 +29,7 @@ def home():
 
 @app.route('/score_board')
 def score_board():
-    contestants = {"Noah": 1, "Bryce": 5}
-    contestants = sorted(contestants.items(), key=lambda x: x[1], reverse=True)
+    contestants = users_scores.query.order_by(users_scores.score.desc()).all()
     return render_template("scoreboard.html", contestants=contestants)
 
 
@@ -27,6 +39,16 @@ def login():
         session.permanent = True
         user = request.form["user_name"]
         session["user"] = user
+        user_data = users_scores.query.filter_by(name=user).first()
+        if user_data:
+            session["score"] = user_data.score
+            session["credit"] = user_data.credit
+        else :
+            #usr = users_scores(user, 0, 0)
+            #db.session.add(usr)
+            #db.session.commit()
+            flash(f"No user named {user}", "info")
+            return render_template("login.html")
         flash("Succesfully logged in", "info")
         return redirect(url_for("user"))
     else:
@@ -36,27 +58,30 @@ def login():
         return render_template("login.html")
 
 
-@app.route("/user", methods=["POST", "GET"])
+@app.route("/user")
 def user():
-    email = None
     if "user" in session:
-        user = session["user"]
-        if request.method == "POST":
-            email = request.form["email"]
-            session["email"] = email
+        user_name = session["user"]
+        user_data = users_scores.query.filter_by(name=user_name).first()
+        if user_data:
+            score = user_data.score
+            credit = user_data.credit
         else:
-            if "email" in session:
-                email = session["email"]
-        return render_template("user.html", email=email)
+            score = 0
+            credits = 0
+
+        return render_template("user.html", user_name=user_name, score=score, credit=credit)
     else:
         return render_template("login.html")
+
 
 
 @app.route("/logout")
 def logout():
     if "user" in session:
         session.pop("user", None)
-        session.pop("email", None)
+        session.pop("score", None)
+        session.pop("credit", None)
         flash("Succesfully logged out", "info")
     return redirect(url_for("login"))
 
@@ -64,17 +89,60 @@ def logout():
 @app.route("/score", methods=["POST", "GET"])
 def score():
     if request.method == "POST":
-        current_user = request.form["user"]
-        current_score = request.form["score"]
-        scores[current_user] += current_score
+        try:
+            data = request.get_json()
+            current_user = data["user"]
+            score_to_add = int(data["score"])
+        except KeyError:
+            return "Invalid request format. Make sure to include 'user' and 'score' in the JSON data."
+        user_data = users_scores.query.filter_by(name=current_user).first()
+        if user_data:
+            user_data.score += score_to_add
+            db.session.commit()
+        else:
+            usr = users_scores(current_user, score_to_add, 0)
+            db.session.add(usr)
+            db.session.commit()
         return "Score successfully added"
+
     elif request.method == "GET":
         current_user = request.args.get("user")
-        if current_user not in scores:
-            return "No score for user : " + current_user
+        user_data = users_scores.query.filter_by(name=current_user).first()
+        if user_data:
+            return jsonify({"user": current_user, "score": user_data.score, "credit": user_data.credit})
         else:
-            return "Score for user : " + current_user + " is : " + str(scores[current_user])
+            return "No user named " + current_user
+
+@app.route("/credit", methods=["POST", "GET"])
+def credit():
+    if request.method == "POST":
+        try:
+            data = request.get_json()
+            current_user = data["user"]
+            credit_to_add = int(data["credit"])
+        except KeyError:
+            return "Invalid request format. Make sure to include 'user' and 'credit' in the JSON data."
+        user_data = users_scores.query.filter_by(name=current_user).first()
+        if user_data:
+            user_data.credit += credit_to_add
+            db.session.commit()
+        else:
+            usr = users_scores(current_user, 0, credit_to_add)
+            db.session.add(usr)
+            db.session.commit()
+        return "Score successfully added"
+
+    elif request.method == "GET":
+        current_user = request.args.get("user")
+        user_data = users_scores.query.filter_by(name=current_user).first()
+        if user_data:
+            return jsonify({"user": current_user, "score": user_data.score, "credit": user_data.credit})
+        else:
+            return "No user named " + current_user
+
 
 
 if __name__ == '__main__':
+    with app.app_context():
+        db.create_all()
     app.run()
