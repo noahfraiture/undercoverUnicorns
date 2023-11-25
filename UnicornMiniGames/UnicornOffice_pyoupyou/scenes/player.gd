@@ -14,6 +14,7 @@ var direction := Vector2.ZERO
 # Signals
 @export var projectile_scene : PackedScene
 signal projectile_fire(projectile)
+signal destroyed
 
 # Fonctions
 func _physics_process(delta):
@@ -44,6 +45,7 @@ func _input(event):
 		projectile_fire.emit(projectile)
 
 func destroy():
+	destroyed.emit()
 	queue_free()
 
 

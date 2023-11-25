@@ -14,7 +14,7 @@ func _physics_process(delta):
 	if (velocity.x > 2 || velocity.x < -2):
 		sprite_2d.animation = "running"
 	
-	# Add the gravity.
+	# Add the gravity
 	if not is_on_floor():
 		velocity.y += gravity * delta
 		sprite_2d.animation = "jumping"

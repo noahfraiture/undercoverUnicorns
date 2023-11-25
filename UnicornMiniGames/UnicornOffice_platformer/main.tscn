@@ -1,6 +1,6 @@
 [gd_scene load_steps=6 format=3 uid="uid://d24yei41j3tg1"]
 
-[ext_resource type="Texture2D" path="res://Blue.png" id="1_g50ki"]
+[ext_resource type="Texture2D" uid="uid://b35a83rokbvjg" path="res://images/Blue.png" id="1_yegei"]
 [ext_resource type="Texture2D" uid="uid://33x2qkwcuknh" path="res://Terrain (16x16).png" id="2_1agwb"]
 [ext_resource type="PackedScene" uid="uid://lea847mpo6w2" path="res://scenes/main_character.tscn" id="3_w8dvu"]
 
@@ -469,7 +469,7 @@ anchor_bottom = 1.0
 offset_bottom = 206.0
 grow_horizontal = 2
 grow_vertical = 2
-texture = ExtResource("1_g50ki")
+texture = ExtResource("1_yegei")
 stretch_mode = 1
 
 [node name="TileMap" type="TileMap" parent="."]

@@ -1,7 +1,7 @@
 extends Node2D
 class_name Level
 
-@export var asteroid_direction_variance = 40.0
+@export var asteroid_direction_variance = 30.0
 @export var asteroid_scene: PackedScene
 @onready var border_rect = %BorderRect
 
@@ -17,8 +17,13 @@ func spawn_asteroid():
 	var asteroid = asteroid_scene.instantiate()
 	add_child(asteroid)
 	
-	# Define asteroid position
-	var angle_from_center = deg_to_rad(randf_range(0.0,360.0))
+	# Define asteroid position (avoid obstacles !)
+	var raw_angle = deg_to_rad(randf_range(0.0,360.0))
+	while(raw_angle > 90 and raw_angle < 145):
+		raw_angle = deg_to_rad(randf_range(0.0,360.0))
+	
+	var angle_from_center = deg_to_rad(raw_angle)
+	
 	var direction_from_center = Vector2.RIGHT.rotated(angle_from_center)
 	var point = screen_center + direction_from_center * spawn_circle_radius
 	
@@ -32,7 +37,7 @@ func spawn_asteroid():
 	var angle_variance = randfn(0.0, deg_to_rad(asteroid_direction_variance))
 	asteroid.direction = direction_to_center.rotated(angle_variance)
 	
-	asteroid.chosenSize = randi_range(0.0, Asteroid.SIZE.size()-1)
+	asteroid.chosenSize = randi_range(0.0, Asteroid.SIZE.size()-2)
 	asteroid.destroyed.connect(_on_asteroid_destroyed.bind(asteroid))
 
 
@@ -53,3 +58,7 @@ func _on_fire_timer_timeout():
 		fire.action = "fire"
 		fire.pressed = true
 		Input.parse_input_event(fire)
+
+
+func _on_player_destroyed():
+	get_tree().reload_current_scene() # Restart game

@@ -10,7 +10,9 @@ func _physics_process(delta):
 	var velocity = direction * speed * delta
 	global_position += velocity
 
-
 func _on_area_entered(area):
 	if area is Asteroid:
 		area.destroy()
+
+func destroy():
+	queue_free()

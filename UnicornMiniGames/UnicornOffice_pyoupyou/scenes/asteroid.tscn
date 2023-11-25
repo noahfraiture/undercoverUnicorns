@@ -1,17 +1,18 @@
-[gd_scene load_steps=13 format=3 uid="uid://ck1suan7km5no"]
+[gd_scene load_steps=15 format=3 uid="uid://ck1suan7km5no"]
 
 [ext_resource type="Script" path="res://scenes/asteroid.gd" id="1_o4p00"]
-[ext_resource type="Texture2D" uid="uid://b0qfccqhg8x53" path="res://sprites/AsteroidBig.png" id="1_vmmts"]
 [ext_resource type="Script" path="res://Resources/AsteroirSize.gd" id="2_r4k4f"]
-[ext_resource type="Texture2D" uid="uid://bts7f1jrc2n4l" path="res://sprites/Asteroid3.png" id="3_pyiu5"]
-[ext_resource type="Texture2D" uid="uid://de1v2ank748eu" path="res://sprites/Asteroid2.png" id="4_2ko2n"]
+[ext_resource type="Texture2D" uid="uid://d00w5s7s72gfa" path="res://sprites/CoffeeMachine.png" id="3_o0noi"]
+[ext_resource type="Texture2D" uid="uid://c7y0t03i28vse" path="res://sprites/chair.png" id="4_1f0fi"]
+[ext_resource type="Texture2D" uid="uid://be1thyjy0thxm" path="res://sprites/printer.png" id="5_pddlh"]
+[ext_resource type="Texture2D" uid="uid://bdwov0favkhl3" path="res://sprites/Levels.png" id="6_imlwd"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_nbf83"]
 radius = 3.0
 
 [sub_resource type="Resource" id="Resource_oilrc"]
 script = ExtResource("2_r4k4f")
-texture = ExtResource("3_pyiu5")
+texture = ExtResource("3_o0noi")
 shape = SubResource("CircleShape2D_nbf83")
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_g01p0"]
@@ -19,7 +20,7 @@ radius = 7.0
 
 [sub_resource type="Resource" id="Resource_rsxh3"]
 script = ExtResource("2_r4k4f")
-texture = ExtResource("4_2ko2n")
+texture = ExtResource("4_1f0fi")
 shape = SubResource("CircleShape2D_g01p0")
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_ks16c"]
@@ -27,23 +28,28 @@ radius = 12.0
 
 [sub_resource type="Resource" id="Resource_omllg"]
 script = ExtResource("2_r4k4f")
-texture = ExtResource("1_vmmts")
+texture = ExtResource("5_pddlh")
 shape = SubResource("CircleShape2D_ks16c")
 
-[sub_resource type="CircleShape2D" id="CircleShape2D_qp6n6"]
-radius = 13.0
+[sub_resource type="Resource" id="Resource_t8lls"]
+script = ExtResource("2_r4k4f")
+texture = ExtResource("6_imlwd")
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_i1n3b"]
+size = Vector2(31.5, 26)
 
 [node name="asteroid" type="Area2D"]
 scale = Vector2(2, 2)
 collision_layer = 2
 script = ExtResource("1_o4p00")
-AsteroidSize_array = Array[ExtResource("2_r4k4f")]([SubResource("Resource_oilrc"), SubResource("Resource_rsxh3"), SubResource("Resource_omllg")])
+AsteroidSize_array = Array[ExtResource("2_r4k4f")]([SubResource("Resource_oilrc"), SubResource("Resource_rsxh3"), SubResource("Resource_omllg"), SubResource("Resource_t8lls")])
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
-texture = ExtResource("1_vmmts")
+scale = Vector2(0.8, 0.8)
+texture = ExtResource("5_pddlh")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
-position = Vector2(1, 1)
-shape = SubResource("CircleShape2D_qp6n6")
+position = Vector2(1.25, 2)
+shape = SubResource("RectangleShape2D_i1n3b")
 
 [connection signal="body_entered" from="." to="." method="_on_body_entered"]
