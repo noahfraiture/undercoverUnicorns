@@ -2,6 +2,7 @@ from flask import Flask, redirect, url_for, render_template, request, session, f
 from datetime import timedelta
 from flask_sqlalchemy import SQLAlchemy
 import requests
+import random
 
 app = Flask(__name__)
 app.secret_key = "IDontKnowWhatKindOfKeyToPut"
@@ -18,11 +19,22 @@ class users_scores(db.Model):
     name = db.Column("name", db.String(100))
     score = db.Column("score", db.Integer)
     credit = db.Column("credit", db.Integer)
+    team = db.Column("team", db.String(100))
 
-    def __init__(self, name, score, credit):
+    def __init__(self, name, score, credit, team):
         self.name = name
         self.score = score
         self.credit = credit
+        self.team = team
+
+class teams_scores(db.Model):
+    _id = db.Column("id", db.Integer, primary_key=True)
+    team_name = db.Column("team_name", db.String(100))
+    team_score = db.Column("team_score", db.Integer)
+
+    def __init__(self, team_name, team_score):
+        self.team_name = team_name
+        self.team_score = team_score
 
 
 @app.route('/')
@@ -37,7 +49,8 @@ def home():
             score = 0
             credit = 0
         contestants = users_scores.query.all()
-        return render_template("home.html", user_name=user_name, score=score, credit=credit, contestants=contestants, penalties=penalties, connected="user" in session)
+        teams = teams_scores.query.all()
+        return render_template("home.html", user_name=user_name, score=score, credit=credit, contestants=contestants, teams=teams, penalties=penalties, connected="user" in session)
     else:
         flash("Please login first")
         return redirect(url_for("login"))
@@ -100,11 +113,13 @@ def score():
         if user_data:
             user_data.score += score_to_add
             db.session.commit()
+            team_data = teams_scores.query.filter_by(team_name=user_data.team).first()
+            if team_data:
+                team_data.team_score += score
+                db.session.commit()
+            return "Score successfully added"
         else:
-            usr = users_scores(current_user, score_to_add, 0)
-            db.session.add(usr)
-            db.session.commit()
-        return "Score successfully added"
+            return "No user named " + current_user
 
     elif request.method == "GET":
         current_user = request.args.get("user")
@@ -127,17 +142,19 @@ def credit():
         if user_data:
             user_data.credit += credit_to_add
             db.session.commit()
+            team_data = teams_scores.query.filter_by(team_name=user_data.team).first()
+            if team_data:
+                team_data.team_score += score
+                db.session.commit()
+            return "Score successfully added"
         else:
-            usr = users_scores(current_user, 0, credit_to_add)
-            db.session.add(usr)
-            db.session.commit()
-        return "Score successfully added"
+            return "No user named " + current_user
 
     elif request.method == "GET":
         current_user = request.args.get("user")
         user_data = users_scores.query.filter_by(name=current_user).first()
         if user_data:
-            return jsonify({"user": current_user, "score": user_data.score, "credit": user_data.credit})
+            return jsonify({"user": current_user, "score": user_data.score, "credit": user_data.credit, "team": user_data.team})
         else:
             return "No user named " + current_user
 
@@ -156,7 +173,17 @@ def perform_penalties():
         return redirect(url_for("login"))
 
     if request.method == "POST":
-        adversary = request.form["adversary"]
+        adversary = None
+        if request.form["team"] :
+            team = request.form["team"]
+            users = users_scores.query.filter_by(team=team).all()
+            if users:
+                adversary = random.choice(users_in_team)
+            else :
+                flash("No one belong to this team")
+                return redirect(url_for("home"))
+        else :
+            adversary = request.form["adversary"]
         proxy_url = "http://localhost:3000/sendMessage"
         headers = {"Content-Type": "application/json"}
 
@@ -201,6 +228,25 @@ def check(response):
     else:
         flash("That was a fail! \n {}".format(response.status_code))
     return redirect(url_for("home"))
+
+def creat_user(users):
+    for user, team in users :
+        print(team)
+        print(user)
+        score = random.randint(0, 250)
+        credit = random.randint(0, 250)
+        usr = users_scores(user, score, credit, team)
+        db.session.add(usr)
+        db.session.commit()
+
+        team_data = teams_scores.query.filter_by(team_name=team).first()
+        if team_data:
+            team_data.team_score += score
+            db.session.commit()
+        else:
+            tm = teams_scores(team, score)
+            db.session.add(tm)
+            db.session.commit()
 
 
 if __name__ == '__main__':
