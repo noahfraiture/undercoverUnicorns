@@ -9,6 +9,9 @@ app.permanent_session_lifetime = timedelta(days=1)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///usersscores.sqlite3'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] =False
 db = SQLAlchemy(app)
+penalties = {"Get half his credit": 200, "See score board": 20, "Inputs block box": 35, "Move cursor randomly":40,
+                     "Push commit": 150, "Kill random navigation tab": 60, "Refresh his tab" : 25,
+                     "Destroy his navigation page": 40, "Change his current tab": 35}
 
 class users_scores(db.Model):
     _id = db.Column("id", db.Integer, primary_key=True)
@@ -33,11 +36,8 @@ def home():
         else: #should never be in this case
             score = 0
             credit = 0
-        penalties = ["Get half his credit", "See score board", "Inputs block box", "Move cursor randomly", "Push commit",
-                     "Kill random navigation tab", "Refresh his tab", "Destroy his navigation page",
-                     "Change his current tab"]
         contestants = users_scores.query.all()
-        return render_template("home.html", user_name=user_name, score=score, credit=credit, contestants=contestants, penalties=penalties)
+        return render_template("home.html", user_name=user_name, score=score, credit=credit, contestants=contestants, penalties=penalties, connected="user" in session)
     else:
         flash("Please login first")
         return redirect(url_for("login"))
@@ -47,7 +47,7 @@ def home():
 def score_board():
     if session.get('penalties_performed'):
         contestants = users_scores.query.order_by(users_scores.score.desc()).all()
-        return render_template("scoreboard.html", contestants=contestants)
+        return render_template("scoreboard.html", contestants=contestants, connected="user" in session)
     else:
         flash("Nice try !")
         return redirect(url_for("home"))
@@ -65,14 +65,14 @@ def login():
             session["credit"] = user_data.credit
         else :
             flash(f"No user named {user}")
-            return render_template("login.html")
+            return render_template("login.html", connected="user" in session)
         flash("Succesfully logged in", "info")
         return redirect(url_for("home"))
     else:
         if "user" in session:
             flash("Already logged in", "info")
             return redirect(url_for("home"))
-        return render_template("login.html")
+        return render_template("login.html", connected="user" in session)
 
 @app.route("/logout")
 def logout():
@@ -143,13 +143,33 @@ def credit():
 
 @app.route("/perform_penalties", methods=["POST", "GET"])
 def perform_penalties():
+    user_data = None
+    if "user" in session:
+        user_name = session["user"]
+        user_data = users_scores.query.filter_by(name=user_name).first()
+        if user_data:
+            credit = user_data.credit
+        else : #normaly never in this case
+            credit = 0
+    else:
+        flash("Please login first")
+        return redirect(url_for("login"))
+
     if request.method == "POST":
         adversary = request.form["adversary"]
         proxy_url = "http://localhost:3000/sendMessage"
         headers = {"Content-Type": "application/json"}
 
+        penalty = request.form["penalty"]
+        price = penalties[penalty]
+        if credit < price:
+            flash("Sorry, you do not have enough credit")
+            return redirect(url_for("home"))
+        else:
+            user_data.credit -= price
+            db.session.commit()
 
-        match request.form["penalty"]:
+        match penalty:
             case "See score board":
                 session['penalties_performed'] = True
                 return redirect(url_for("score_board"))
