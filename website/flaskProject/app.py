@@ -37,7 +37,7 @@ def home():
             score = 0
             credit = 0
         contestants = users_scores.query.all()
-        return render_template("home.html", user_name=user_name, score=score, credit=credit, contestants=contestants, penalties=penalties)
+        return render_template("home.html", user_name=user_name, score=score, credit=credit, contestants=contestants, penalties=penalties, connected="user" in session)
     else:
         flash("Please login first")
         return redirect(url_for("login"))
@@ -47,7 +47,7 @@ def home():
 def score_board():
     if session.get('penalties_performed'):
         contestants = users_scores.query.order_by(users_scores.score.desc()).all()
-        return render_template("scoreboard.html", contestants=contestants)
+        return render_template("scoreboard.html", contestants=contestants, connected="user" in session)
     else:
         flash("Nice try !")
         return redirect(url_for("home"))
@@ -65,14 +65,14 @@ def login():
             session["credit"] = user_data.credit
         else :
             flash(f"No user named {user}")
-            return render_template("login.html")
+            return render_template("login.html", connected="user" in session)
         flash("Succesfully logged in", "info")
         return redirect(url_for("home"))
     else:
         if "user" in session:
             flash("Already logged in", "info")
             return redirect(url_for("home"))
-        return render_template("login.html")
+        return render_template("login.html", connected="user" in session)
 
 @app.route("/logout")
 def logout():
