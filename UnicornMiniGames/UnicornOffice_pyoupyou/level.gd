@@ -1,7 +1,7 @@
 extends Node2D
 class_name Level
 
-@export var asteroid_direction_variance = 30.0
+@export var asteroid_direction_variance = .0
 @export var asteroid_scene: PackedScene
 @onready var border_rect = %BorderRect
 
@@ -33,7 +33,7 @@ func spawn_asteroid():
 	asteroid.position = point
 	
 	# Define asteroid direction
-	var direction_to_center = point.direction_to(screen_center)
+	var direction_to_center = point.direction_to($Player.global_position)
 	var angle_variance = randfn(0.0, deg_to_rad(asteroid_direction_variance))
 	asteroid.direction = direction_to_center.rotated(angle_variance)
 	
@@ -56,14 +56,6 @@ func _on_asteroid_destroyed(asteroid):
 
 func _on_spawn_timer_timeout():
 	spawn_asteroid()
-	
-
-func _on_fire_timer_timeout():
-	if Input.is_action_pressed("fire"):
-		var fire = InputEventAction.new()
-		fire.action = "fire"
-		fire.pressed = true
-		Input.parse_input_event(fire)
 
 
 func _on_player_destroyed():

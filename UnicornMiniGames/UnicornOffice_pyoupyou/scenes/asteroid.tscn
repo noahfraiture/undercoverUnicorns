@@ -1,10 +1,11 @@
-[gd_scene load_steps=13 format=3 uid="uid://ck1suan7km5no"]
+[gd_scene load_steps=14 format=3 uid="uid://ck1suan7km5no"]
 
 [ext_resource type="Script" path="res://scenes/asteroid.gd" id="1_o4p00"]
 [ext_resource type="Script" path="res://Resources/AsteroirSize.gd" id="2_r4k4f"]
 [ext_resource type="Texture2D" uid="uid://d00w5s7s72gfa" path="res://sprites/CoffeeMachine.png" id="3_o0noi"]
 [ext_resource type="Texture2D" uid="uid://c7y0t03i28vse" path="res://sprites/chair.png" id="4_1f0fi"]
 [ext_resource type="Texture2D" uid="uid://be1thyjy0thxm" path="res://sprites/printer.png" id="5_pddlh"]
+[ext_resource type="AudioStream" uid="uid://cao8q3docovqd" path="res://Audio/explosion_1.wav" id="6_gkfxj"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_if3qf"]
 size = Vector2(10, 5)
@@ -45,5 +46,9 @@ texture = ExtResource("5_pddlh")
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 position = Vector2(-1, 1.5)
 shape = SubResource("RectangleShape2D_i1n3b")
+
+[node name="explosion" type="AudioStreamPlayer2D" parent="."]
+stream = ExtResource("6_gkfxj")
+max_polyphony = 20
 
 [connection signal="body_entered" from="." to="." method="_on_body_entered"]

@@ -58,10 +58,19 @@ func _input(event):
 		projectile.position = global_position
 		projectile.rotation = rotation + deg_to_rad(projectile_deg_rotation)
 		projectile.direction = Vector2.RIGHT.rotated(projectile.rotation)
-		print(projectile_deg_rotation)
-		print(projectile.rotation)
-		print(projectile.direction)
+
 		projectile_fire.emit(projectile)
+		$shoot.play()
+		$FireTimer.start()
+
+
+func _on_fire_timer_timeout():
+	if Input.is_action_pressed("fire"):
+		var fire = InputEventAction.new()
+		fire.action = "fire"
+		fire.pressed = true
+		Input.parse_input_event(fire)
+
 
 func destroy():
 	destroyed.emit()

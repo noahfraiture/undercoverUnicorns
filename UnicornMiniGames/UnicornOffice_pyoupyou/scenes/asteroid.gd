@@ -17,6 +17,8 @@ signal destroyed
 var is_destroyed = 0.0 # 0.0 pour false, 1.0 pour projectile, 2.0 pour obstacle
 
 var direction = Vector2.RIGHT
+@onready var Player = get_parent().get_node("Player")
+
 @export var speed = 200.0
 #@export var torque = 50.0
 @onready var sprite_2d = $Sprite2D
@@ -49,6 +51,15 @@ func _physics_process(delta):
 	var velocity = speed * direction * delta
 	global_position += velocity
 	
+	var pdir = Player.global_position - global_position
+	pdir /= pdir.length()
+	
+	direction += pdir*0.01
+	direction /= direction.length()
+	
+	# velocity += dir/100000
+	
+	
 	#rotation_degrees += torque*delta
 
 func _on_body_entered(body):
@@ -59,6 +70,8 @@ func destroy():
 	speed = 0
 	collision_shape_2d.disabled = true
 	destroyed.emit()
+	$explosion.play()
+	
 	
 	if is_destroyed == 2.0:
 		self.scale = self.scale * 0.4

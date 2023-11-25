@@ -9,4 +9,4 @@ var inc = 0
 func _process(delta):
 	if max_wait_time == 0.0:
 		max_wait_time = self.wait_time
-	self.wait_time = min_wait_time + (max_wait_time - min_wait_time)*sqrt(min(self.wait_time, 0.9)
+	self.wait_time = min_wait_time + (max_wait_time - min_wait_time)*sqrt(min(self.wait_time, 0.9))
