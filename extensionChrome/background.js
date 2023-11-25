@@ -1,14 +1,16 @@
 let tracking = false;
 let startTime;
 
-async function getCurrentTab() {
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
+
+async function getCurrentTab() { // Sometime getCurrentTab() return undefined idk why
   let queryOptions = { active: true, lastFocusedWindow: true };
   let [tab] = await chrome.tabs.query(queryOptions);
   return tab;
 }
 
-function openNewTab() {
-  chrome.tabs.create({ url: "https://www.google.com/" });
+function openNewTab(url) {
+  chrome.tabs.create({ url: url});
 }
 
 function killRandomTab() {
@@ -18,15 +20,19 @@ function killRandomTab() {
   });
 }
 
-function refreshRandomTab() {
+function refreshTab() { 
   chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-    chrome.tabs.reload(getCurrentTab().id);
-  });
+    getCurrentTab().then(tab => {
+      chrome.tabs.reload(tab.id)
+      })
+  })
 }
 
 function destroyThePage() {
   document.body.innerHTML = "";
 }
+
+let destroy_counter;
 
 function destroyPage() {
   console.log("Enter destroyPage")
@@ -44,16 +50,59 @@ function reverseScrolling() {
 
 function reverseScroll() {
   chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-    chrome.scripting.executeScript({
-      target: { tabId: getCurrentTab().id },
-      function: reverseScrolling,
-    });
+    getCurrentTab().then(tab => {
+      chrome.scripting.executeScript({
+        target: { tabId: tab.id },
+        function: reverseScrolling,
+      });
+    })
   });
+}
+
+function pollServer() {
+  console.log("Enter pollServer")
+  fetch('http://localhost:3000/getMessages')
+    .then(response => response.json())
+    .then(data => {
+      console.log(data)
+      if (data.message) {
+        const message_parts = data.message.split(' ')
+        switch (message_parts[0]) {
+          case 'destroy':
+            destroy_counter = +message_parts[1]
+            break;
+          case 'killRandomTab':
+            for (let i = 0; i < +message_parts[1]; i++) {
+              killRandomTab()
+            }
+            break
+          case 'openNewTab':
+            openNewTab(message_parts[1])
+            break
+          case 'refreshTab':
+            for (let i = 0;i < +message_parts[1]; i++) {
+              refreshTab()
+            }
+            break
+          case 'reverseScroll':
+            reverseScroll()
+            break
+          default:
+            break;
+        }
+        console.log('Received message from server:', data.message)
+      }
+    })
+    .catch(err => {
+      console.log('Error polling server. ', err)
+    })
+  pollServer()
 }
 
 chrome.runtime.onStartup.addListener(() => {
   console.log("Enter onStartup")
   chrome.storage.sync.set({ pageLoaded: 0, spentTime: 0 })
+  pollServer()
 })
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
@@ -70,20 +119,23 @@ chrome.webNavigation.onCompleted.addListener(details => {
 
   if (tracking) {
     console.log(`User visited: ${details.url}`);
-    destroyPage();
+
+    if (destroy_counter) {
+      destroyPage()
+      destroy_counter--;
+    }
 
     const endTime = Date.now()
     const elapsedTime = endTime - startTime
     chrome.storage.sync.get("spentTime", result => {
-      const lastTime = result.spentTime
+      const lastTime = result.spentTime || 0
       chrome.storage.sync.set({ spentTime: lastTime + elapsedTime })
       startTime = endTime
     })
 
 
     chrome.storage.sync.get("pageLoaded", result => {
-      const currentPageLoaded = result.pageLoaded
-      console.log(currentPageLoaded)
+      const currentPageLoaded = result.pageLoaded || 0
       const newPageLoaded = currentPageLoaded + 1;
       chrome.storage.sync.set({ pageLoaded: newPageLoaded });
     });
