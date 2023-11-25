@@ -17,6 +17,15 @@
           <li class="nav-item active">
             <a class="nav-link" href="{{ url_for('home') }}">Home</a>
           </li>
+          <li class="nav-item active">
+            <a class="nav-link" href="{{ url_for('team_distribution') }}">Teams</a>
+          </li>
+          <li class="nav-item active">
+            <a class="nav-link" href="{{ url_for('team_scoreboard') }}">Scoreboard</a>
+          </li>
+          <li class="nav-item active">
+            <a class="nav-link" href="{{ url_for('prices') }}">Penalties Prices</a>
+          </li>
           {% if connected %}
             <li class="nav-item">
               <a class="nav-link" href="{{ url_for('logout') }}">Logout</a>

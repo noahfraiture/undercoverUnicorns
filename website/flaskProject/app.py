@@ -56,14 +56,19 @@ def home():
         return redirect(url_for("login"))
 
 
-@app.route('/score_board', methods=['GET'])
-def score_board():
+@app.route('/secret_score_board', methods=['GET'])
+def secret_score_board():
     if session.get('penalties_performed'):
         contestants = users_scores.query.order_by(users_scores.score.desc()).all()
-        return render_template("scoreboard.html", contestants=contestants, connected="user" in session)
+        return render_template("secret_scoreboard.html", contestants=contestants, connected="user" in session)
     else:
         flash("Nice try !")
         return redirect(url_for("home"))
+
+@app.route('/team_scoreboard')
+def team_scoreboard():
+    teams = teams_scores.query.all()
+    return render_template('teams_scoreboard.html', teams=teams, connected="user" in session)
 
 
 @app.route('/login', methods=["POST", "GET"])
@@ -98,6 +103,26 @@ def logout():
     else :
         flash("No current user to logout", "info")
     return redirect(url_for("login"))
+
+@app.route('/team_distribution')
+def team_distribution():
+    if "user" in session:
+        contestants = users_scores.query.all()
+        teams = teams_scores.query.all()
+        user_teams = {}
+        for user in contestants:
+            if user.team not in user_teams:
+                user_teams[user.team] = []
+            user_teams[user.team].append(user)
+        return render_template("teams.html", user_teams=user_teams, teams=teams, connected="user" in session)
+    else:
+        flash("Please login first")
+        return redirect(url_for("login"))
+
+@app.route('/penalty_prices')
+def prices():
+    sorted_penalties = dict(sorted(penalties.items(), key=lambda item: item[1]))
+    return render_template('prices.html', penalties=sorted_penalties, connected="user" in session)
 
 
 @app.route("/score", methods=["POST", "GET"])
@@ -199,7 +224,7 @@ def perform_penalties():
         match penalty:
             case "See score board":
                 session['penalties_performed'] = True
-                return redirect(url_for("score_board"))
+                return redirect(url_for("secret_score_board"))
             case "Kill random navigation tab":
                 data = {"message": "killRandomTab 1", "user": adversary}
                 return check(requests.post(proxy_url, headers=headers, json=data))
