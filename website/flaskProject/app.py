@@ -143,6 +143,7 @@ def credit():
 
 @app.route("/perform_penalties", methods=["POST", "GET"])
 def perform_penalties():
+    user_data = None
     if "user" in session:
         user_name = session["user"]
         user_data = users_scores.query.filter_by(name=user_name).first()
@@ -162,8 +163,11 @@ def perform_penalties():
         penalty = request.form["penalty"]
         price = penalties[penalty]
         if credit < price:
-            flash("Sorry, you do not have enough credit to be this mean")
+            flash("Sorry, you do not have enough credit")
             return redirect(url_for("home"))
+        else:
+            user_data.credit -= price
+            db.session.commit()
 
         match penalty:
             case "See score board":
