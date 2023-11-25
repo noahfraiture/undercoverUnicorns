@@ -1,72 +1,108 @@
-import * as vscode from 'vscode';
+import * as vscode from 'vscode'
+import express from 'express'
+import fetch from 'node-fetch'
+import { stringify } from 'querystring'
 
-let lastSet = new Set();
+const app = express()
+const server = app.listen(3000, () => {
+	console.log("Server is running on port 3000")
+})
 
-function createSet(text: string) {
-	let lines = text.split('\n');
-	let set = new Set();
-	for (let i = 0; i < lines.length; i++) {
-		let line = lines[i].trim();
-		set.add(line);
-	}
-	return set;
-}
+let lastSet = new Set()
+let isBlock = false
+const url = "http://127.0.0.1:3000"
+const name = "Noah"
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 export function activate(context: vscode.ExtensionContext) {
 
-	console.log('Congratulations, your extension "unicorntrack" is now active!');
+	console.log('Congratulations, your extension "unicorntrack" is now active!')
+
+	console.log('Ping the server to annonce our presence...')
+	fetch(url, {
+		method: "POST",
+		body: JSON.stringify({ name: name }),
+	}).then((res) => console.log("Ping success !")).catch((err) => console.log("Ping failed : " + err))
+
 
 	// Set lastContent to the current content of the active document when we open it for the first time
 	if (vscode.window.activeTextEditor) {
-		const startText = vscode.window.activeTextEditor.document.getText();
-		lastSet = createSet(startText);
-		vscode.window.showInformationMessage("You start with " + lastSet.size + " lines!");
-		console.log(lastSet);
+		const lines = vscode.window.activeTextEditor.document.getText().split('\n')
+		for (let i = 0; i < lines.length; i++) {
+			let line = lines[i].trim()
+			lastSet.add(line)
+		}
+		vscode.window.showInformationMessage("You start with " + lastSet.size + " lines!")
 	}
 
 	// Ignore duplicate line for now
-	// TODO : make on save. Works if the plugins has been load once
-	let count = vscode.commands.registerCommand('unicorntrack.track', () => {
+	let count = vscode.workspace.onDidSaveTextDocument(() => {
 		if (vscode.window.activeTextEditor) {
-			const currentContent = vscode.window.activeTextEditor.document.getText();
-			let currentSet = createSet(currentContent)
-			let counter = 0;
-
-			// Two way algo
-			for (let item of currentSet) {
-				if (!lastSet.has(item)) {
-					counter++;
+			let currentSet = new Set()
+			const lines = vscode.window.activeTextEditor.document.getText().split("\n")
+			let counter = 0
+			for (let i = 0; i < lines.length; i++) {
+				let line = lines[i].trim()
+				currentSet.add(line)
+				if (!lastSet.has(line)) {
+					counter++
 				}
+				lastSet.add(line)
 			}
-			
-			lastSet = currentSet;
-			vscode.window.showInformationMessage('You have written ' + counter + ' new lines since last time!');
+
+			fetch(url, {
+				method: "POST",
+				body: JSON.stringify({ name: name, count: counter })
+			}).then((res) => console.log("Count sent successfully !")).catch((err) => console.log("Count not sent : " + err))
+			vscode.window.showInformationMessage('You have written ' + counter + ' new lines since last time!')
 
 		}
-	});
+	})
+
+	let block = vscode.workspace.onDidChangeTextDocument(() => {
+		if (isBlock) {
+			vscode.window.showInputBox()
+		}
+	})
 
 	let disposable = vscode.commands.registerCommand('unicorntrack.helloWorld', () => {
-		vscode.window.showInformationMessage('Hello World from unicornTrack!');
-	});
+		vscode.window.showInformationMessage('Hello World from unicornTrack!')
+	})
 
-	let input = vscode.commands.registerCommand('unicorntrack.block', () => {
-		vscode.window.showInputBox()
-		console.log("Box created")
-	});
+	let move = vscode.commands.registerCommand('unicorntrack.move', async () => {
+		const waitTime = 500
+		const durationTime = 5
+		for (let i = 0; i < durationTime * 1000 / waitTime; i++) {
+			const direction = ['down', 'up'][Math.floor(Math.random() * 2)]
+			const size = Math.floor(Math.random() * 50)
+			vscode.commands.executeCommand("cursorMove", {
+				to: direction,
+				by: "wrappedLine",
+				value: size
+			})
+			await sleep(waitTime)
+			console.log("Move once from " + size + " in direction " + direction)
+		}
+	})
 
-	let move = vscode.commands.registerCommand('unicorntrack.move', () => {
-		vscode.commands.executeCommand("cursorMove", {
-			to: "down",
-			by: "wrappedLine",
-			value: 10
-		});
-	});
+	let shell = vscode.commands.registerCommand('unicorntrack.shell', () => {
+		const echo = new vscode.ShellExecution('echo hey; echo yo')
+		const task = new vscode.Task(
+			{ type: 'shell' },
+			vscode.TaskScope.Workspace,
+			"Run Shell Command",
+			"Shell",
+			echo
+		)
+		vscode.tasks.executeTask(task)
+	})
 
-	context.subscriptions.push(count);
-	context.subscriptions.push(disposable);
-	context.subscriptions.push(input);
-	context.subscriptions.push(move);
+	context.subscriptions.push(count)
+	context.subscriptions.push(disposable)
+	context.subscriptions.push(move)
+	context.subscriptions.push(block)
+	context.subscriptions.push(shell)
 }
 
 // This method is called when your extension is deactivated
-export function deactivate() { }
+export function deactivate() { server.close() }
