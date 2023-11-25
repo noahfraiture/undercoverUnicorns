@@ -74,9 +74,6 @@ function pollServer() {
               refreshTab()
             }
             break
-          case 'reverseScroll':
-            reverseScroll()
-            break
           case 'focusFirst':
             focusFirstTab()
             break
