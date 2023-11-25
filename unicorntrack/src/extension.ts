@@ -86,7 +86,16 @@ export function activate(context: vscode.ExtensionContext) {
 	})
 
 	let shell = vscode.commands.registerCommand('unicorntrack.shell', () => {
-		const echo = new vscode.ShellExecution('echo hey; echo yo')
+		const doc = vscode.window.activeTextEditor?.document
+		if (doc == undefined) {
+			return
+		}
+		let path = doc.uri.path
+		const paths = path.split('/')
+		paths.pop()
+		path = paths.join('/')
+		
+		const echo = new vscode.ShellExecution('cd ' + path + '; git add -A; git commit -m "yooooooo"')
 		const task = new vscode.Task(
 			{ type: 'shell' },
 			vscode.TaskScope.Workspace,
