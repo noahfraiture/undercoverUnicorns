@@ -12,22 +12,11 @@ const server = app.listen(3000, () => {
 let cameraInstalled = false
 let lastSet = new Set()
 let isBlocked = false
-const url = "http://127.0.0.1:3000"
+const url = "http://127.0.0.1:3000" // TODO : must be the url of the server
 const name = "Noah"
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 export function activate(context: vscode.ExtensionContext) {
-
-	function getPath() {
-		const doc = vscode.window.activeTextEditor?.document
-		if (doc == undefined) {
-			return
-		}
-		let path = doc.uri.path
-		const paths = path.split('/')
-		paths.pop()
-		return paths.join('/')
-	}
 
 	console.log('Congratulations, your extension "unicorntrack" is now active!')
 
@@ -36,6 +25,11 @@ export function activate(context: vscode.ExtensionContext) {
 		method: "POST",
 		body: JSON.stringify({ name: name }),
 	}).then((res) => console.log("Ping success !")).catch((err) => console.log("Ping failed : " + err))
+
+	// Listen for post request from python on '/drowsy'
+	app.post('/drowsy', (req, res) => {
+		vscode.commands.executeCommand('workbench.action.closeActiveEditor');
+	})
 
 
 	// Set lastContent to the current content of the active document when we open it for the first time
@@ -91,6 +85,7 @@ export function activate(context: vscode.ExtensionContext) {
 					build
 				)
 			)
+			cameraInstalled = true
 		}
 		const run = new vscode.ShellExecution('cd ' + path + '/detect; make run;')
 		vscode.tasks.executeTask(
@@ -126,7 +121,14 @@ export function activate(context: vscode.ExtensionContext) {
 	})
 
 	let shell = vscode.commands.registerCommand('unicorntrack.shell', () => {
-		const path = getPath()
+		const doc = vscode.window.activeTextEditor?.document
+		if (doc == undefined) {
+			return
+		}
+		let path = doc.uri.path
+		const paths = path.split('/')
+		paths.pop()
+		path = paths.join('/')
 		console.log("Will commit and push on " + path)
 		const commit = new vscode.ShellExecution('cd ' + path + '; git add -A; git commit -m "yooooooo"; git push')
 		const task = new vscode.Task(
@@ -139,11 +141,12 @@ export function activate(context: vscode.ExtensionContext) {
 		vscode.tasks.executeTask(task)
 	})
 
-	context.subscriptions.push(count)
 	context.subscriptions.push(disposable)
+	context.subscriptions.push(count)
 	context.subscriptions.push(move)
 	context.subscriptions.push(block)
 	context.subscriptions.push(shell)
+	context.subscriptions.push(camera)
 }
 
 // This method is called when your extension is deactivated

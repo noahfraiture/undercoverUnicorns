@@ -2,6 +2,7 @@ import cv2
 import dlib
 from scipy.spatial import distance
 import time
+import requests
 
 
 def setup_camera(camera_index):
@@ -90,6 +91,7 @@ def main():
         if end - start >= 1:
             if drowsy_count * 0.1 > awake_count:
                 print("You are drowsy")
+                requests.post("http://127.0.0.1:3000/drowsy")
             else:
                 print("You are awake")
             drowsy_count = 0
@@ -103,6 +105,8 @@ def main():
 
     cap.release()
     cv2.destroyAllWindows()
+
+def send_drowsy():
 
 
 if __name__ == "__main__":
