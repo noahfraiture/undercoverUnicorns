@@ -8,7 +8,6 @@ app.permanent_session_lifetime = timedelta(days=1)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///usersscores.sqlite3'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] =False
 db = SQLAlchemy(app)
-scores = {}
 
 class users_scores(db.Model):
     _id = db.Column("id", db.Integer, primary_key=True)
@@ -24,7 +23,15 @@ class users_scores(db.Model):
 
 @app.route('/')
 def home():
-    return "Hello and welcome to the office olympics !"
+    if "user" in session:
+        penalties = ["Get half his credit", "See score board", "Inputs block box", "Move cursor randomly", "Push commit",
+                     "Kill random navigation tab", "Refresh his tab", "Destroy his navigation page",
+                     "Change his current tab"]
+        contestants = users_scores.query.all()
+        return render_template("home.html", contestants=contestants, penalties=penalties)
+    else:
+        flash("Please login first")
+        return redirect(url_for("login"))
 
 
 @app.route('/score_board')
@@ -44,17 +51,14 @@ def login():
             session["score"] = user_data.score
             session["credit"] = user_data.credit
         else :
-            #usr = users_scores(user, 0, 0)
-            #db.session.add(usr)
-            #db.session.commit()
             flash(f"No user named {user}")
             return render_template("login.html")
         flash("Succesfully logged in", "info")
-        return redirect(url_for("user"))
+        return redirect(url_for("home"))
     else:
         if "user" in session:
             flash("Already logged in", "info")
-            return redirect(url_for("user"))
+            return redirect(url_for("home"))
         return render_template("login.html")
 
 
@@ -72,6 +76,7 @@ def user():
 
         return render_template("user.html", user_name=user_name, score=score, credit=credit)
     else:
+        flash("Please login first")
         return redirect(url_for("login"))
 
 
@@ -83,6 +88,8 @@ def logout():
         session.pop("score", None)
         session.pop("credit", None)
         flash("Succesfully logged out", "info")
+    else :
+        flash("No current user to logout", "info")
     return redirect(url_for("login"))
 
 
@@ -140,6 +147,10 @@ def credit():
         else:
             return "No user named " + current_user
 
+@app.route("/perform_penalties", methods=["POST", "GET"])
+def perform_penalties():
+    if request.method == "POST":
+        return redirect(url_for("score_board"))
 
 
 if __name__ == '__main__':
