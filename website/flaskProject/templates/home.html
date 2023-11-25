@@ -3,21 +3,13 @@
 {% block title %}Office Olympics{% endblock %}
 
 {% block content %}
-    {% for message in get_flashed_messages() %}
-        <div class="alert alert-primary alert-dismissible fade show" role="alert">
-          {{ message }}
-          <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-          </button>
-        </div>
-    {% endfor %}
 
     <h1>Hello and welcome to the Office Olympics!</h1>
 
     <form method="post" action="{{ url_for('perform_penalties') }}" class="my-4" novalidate>
         <div class="form-group">
-            <label for="userSelect">Select an Adversary:</label>
-            <input type="text" list="userList" class="form-control" id="userSelect" name="user" placeholder="Search for a user" required>
+            <label for="adversarySelect">Select an Adversary:</label>
+            <input type="text" list="userList" class="form-control" id="adversarySelect" name="adversary" placeholder="Search for a user" required>
             <datalist id="userList">
                 {% for contestant in contestants %}
                     <option value="{{ contestant.name }}">
@@ -40,16 +32,16 @@
     <script>
 
         // Enable the submit button when valid options are selected
-        document.getElementById("userSelect").addEventListener("input", enableSubmitButton);
+        document.getElementById("adversarySelect").addEventListener("input", enableSubmitButton);
         document.getElementById("penaltySelect").addEventListener("input", enableSubmitButton);
 
         function enableSubmitButton() {
-            var userSelect = document.getElementById("userSelect");
+            var adversarySelect = document.getElementById("adversarySelect");
             var penaltySelect = document.getElementById("penaltySelect");
             var submitButton = document.getElementById("submitButton");
 
             // Enable the submit button only if both name and penalty are valid
-            if ((isNameValid(userSelect.value.trim()) && isPenaltyValid(penaltySelect.value.trim()))
+            if ((isNameValid(adversarySelect.value.trim()) && isPenaltyValid(penaltySelect.value.trim()))
             || (penaltySelect.value.trim() == "See score board") ){
                 submitButton.disabled = false;
             } else {

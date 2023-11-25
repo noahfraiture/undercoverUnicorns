@@ -34,10 +34,14 @@ def home():
         return redirect(url_for("login"))
 
 
-@app.route('/score_board')
+@app.route('/score_board', methods=['GET'])
 def score_board():
-    contestants = users_scores.query.order_by(users_scores.score.desc()).all()
-    return render_template("scoreboard.html", contestants=contestants)
+    if session.get('penalties_performed'):
+        contestants = users_scores.query.order_by(users_scores.score.desc()).all()
+        return render_template("scoreboard.html", contestants=contestants)
+    else:
+        flash("Nice try !")
+        return redirect(url_for("home"))
 
 
 @app.route('/login', methods=["POST", "GET"])
@@ -87,6 +91,7 @@ def logout():
         session.pop("user", None)
         session.pop("score", None)
         session.pop("credit", None)
+        session.pop('penalties_performed', None)
         flash("Succesfully logged out", "info")
     else :
         flash("No current user to logout", "info")
@@ -150,7 +155,11 @@ def credit():
 @app.route("/perform_penalties", methods=["POST", "GET"])
 def perform_penalties():
     if request.method == "POST":
-        return redirect(url_for("score_board"))
+        if request.form["penalty"] == "See score board":
+            session['penalties_performed'] = True
+            return redirect(url_for("score_board"))
+    flash("You dum dum")
+    return redirect(url_for("home"))
 
 
 if __name__ == '__main__':
