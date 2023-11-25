@@ -1,6 +1,7 @@
 from flask import Flask, redirect, url_for, render_template, request, session, flash, jsonify
 from datetime import timedelta
 from flask_sqlalchemy import SQLAlchemy
+import requests
 
 app = Flask(__name__)
 app.secret_key = "IDontKnowWhatKindOfKeyToPut"
@@ -143,22 +144,42 @@ def credit():
 @app.route("/perform_penalties", methods=["POST", "GET"])
 def perform_penalties():
     if request.method == "POST":
-        if request.form["penalty"] == "See score board":
-            session['penalties_performed'] = True
-            return redirect(url_for("score_board"))
-        elif request.form["penalty"] == "Kill random navigation tab": #Marche pas
-            adversary = request.form["adversary"]
-            url = "http://localhost:3000/sendMessage"
-            headers = {"Content-Type": "application/json"}
-            data = {"message": "killRandomTab 1"}
-            response = requests.post(url, headers=headers, data=data) # TODO : repair
-            if response.status_code == 200:
-                flash("uhum that wasn't really nice, oh well")
-            else:
-                flash("That was a fail! \n {}".format(response.status_code))
+        adversary = request.form["adversary"]
+        proxy_url = "http://localhost:3000/sendMessage"
+        headers = {"Content-Type": "application/json"}
 
-            return redirect(url_for("home"))
+
+        match request.form["penalty"]:
+            case "See score board":
+                session['penalties_performed'] = True
+                return redirect(url_for("score_board"))
+            case "Kill random navigation tab":
+                data = {"message": "killRandomTab 1", "user": adversary}
+                return check(requests.post(proxy_url, headers=headers, json=data))
+            case "Destroy his navigation page":
+                data = {"message": "destroy 1", "user": adversary}
+                return check(requests.post(proxy_url, headers=headers, json=data))
+            case "Open a new tab":
+                data = {"message": "openNewTab https://www.decisionproblem.com/paperclips/", "user": adversary}
+                return check(requests.post(proxy_url, headers=headers, json=data))
+            case "Refresh his tab":
+                data = {"message": "refresh", "user": adversary}
+                return check(requests.post(proxy_url, headers=headers, json=data))
+            case "Change his current tab":
+                data = {"message": "focusFirst", "user": adversary} # TODO : change name here and in the proxy
+                return check(requests.post(proxy_url, headers=headers, json=data))
+            case _:
+                print("Invalid penalty")
+
+
     flash("You dum dum")
+    return redirect(url_for("home"))
+
+def check(response):
+    if response.status_code == 200:
+        flash("uhum that wasn't really nice, oh well")
+    else:
+        flash("That was a fail! \n {}".format(response.status_code))
     return redirect(url_for("home"))
 
 

@@ -17,6 +17,7 @@ function openNewTab(url) {
 
 function killRandomTab() {
   chrome.tabs.query({ currentWindow: true }, function (tabs) {
+    while (tabs === undefined) { }
     const random = Math.floor(Math.random() * tabs.length);
     chrome.tabs.remove(tabs[random].id);
   });
