@@ -23,7 +23,7 @@ var direction = Vector2.RIGHT
 @onready var collision_shape_2d = $CollisionShape2D
 
 # ===== Size management ===== 
-enum SIZE { SMALL, MEDIUM, BIG, BOOM }
+enum SIZE { SMALL, MEDIUM, BIG }
 @export var AsteroidSize_array : Array[AsteroidSize]
 
 @export var chosenSize : SIZE = SIZE.BIG:
@@ -60,6 +60,10 @@ func destroy():
 	collision_shape_2d.disabled = true
 	destroyed.emit()
 	
+	if is_destroyed == 2.0:
+		self.scale = self.scale * 0.4
+	else: 
+		self.scale = self.scale * 0.75
 	sprite_2d.texture = Boom1
 	await get_tree().create_timer(0.07).timeout
 	sprite_2d.texture = Boom2

@@ -22,9 +22,8 @@ func spawn_asteroid():
 	
 	# Define asteroid position (avoid obstacles !)
 	var raw_angle = randf_range(0.0,360.0)
-	while(raw_angle > 90 and raw_angle < 145):
+	while(raw_angle > 200 and raw_angle < 265) || (raw_angle > 300 and raw_angle < 325):
 		raw_angle = randf_range(0.0,360.0)
-	
 	var angle_from_center = deg_to_rad(raw_angle)
 	
 	var direction_from_center = Vector2.RIGHT.rotated(angle_from_center)
@@ -38,7 +37,13 @@ func spawn_asteroid():
 	var angle_variance = randfn(0.0, deg_to_rad(asteroid_direction_variance))
 	asteroid.direction = direction_to_center.rotated(angle_variance)
 	
-	asteroid.chosenSize = randi_range(0.0, Asteroid.SIZE.size()-2)
+	asteroid.chosenSize = randi_range(0.0, Asteroid.SIZE.size()-1)
+	if asteroid.chosenSize == 0:
+		asteroid.scale = Vector2(1.5, 1.5)
+		asteroid.speed = 170.0
+	if asteroid.chosenSize == 1:
+		asteroid.scale = Vector2(1.8, 1.8)
+		asteroid.speed = 190.0
 	asteroid.destroyed.connect(_on_asteroid_destroyed.bind(asteroid))
 
 
@@ -47,7 +52,7 @@ func _input(event):
 		spawn_asteroid()
 
 func _on_asteroid_destroyed(asteroid):
-	pass
+	pass # Calculer les points si asteroid.is_destroyed == 1.0
 
 func _on_spawn_timer_timeout():
 	spawn_asteroid()

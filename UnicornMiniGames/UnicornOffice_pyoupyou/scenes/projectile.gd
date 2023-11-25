@@ -3,7 +3,7 @@ class_name Projectile
 
 @export var speed = 400.0
 
-@onready var direction := Vector2.RIGHT.rotated(rotation) # onready = quand ajouté dans l'arbre
+var direction := Vector2.RIGHT
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _physics_process(delta):

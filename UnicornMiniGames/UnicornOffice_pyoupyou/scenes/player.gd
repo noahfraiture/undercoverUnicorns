@@ -4,7 +4,6 @@ class_name Player
 # Variables
 var speed : float = 0.0
 var max_speed : float = 400.0
-
 var last_direction := Vector2.ZERO
 var direction := Vector2.ZERO
 
@@ -12,9 +11,13 @@ var direction := Vector2.ZERO
 @export_range(0.0,1.0) var lerp_angle_factor = 0.1
 
 # Signals
+@onready var sprite_2d = $Sprite2D
 @export var projectile_scene : PackedScene
 signal projectile_fire(projectile)
 signal destroyed
+
+var mouse_pos = get_global_mouse_position()
+var projectile_deg_rotation = rad_to_deg(global_position.angle_to_point(mouse_pos) - rotation)
 
 # Fonctions
 func _physics_process(delta):
@@ -28,10 +31,22 @@ func _physics_process(delta):
 	move_and_slide()
 
 	# rotate the ship toward the mouse
-	var mouse_pos = get_global_mouse_position()
-	var angle = global_position.angle_to_point(mouse_pos)
-	rotation = lerp_angle(rotation, angle, lerp_angle_factor)
+	# var mouse_pos = get_global_mouse_position()
+	# var angle = global_position.angle_to_point(mouse_pos)
+	# rotation = lerp_angle(rotation, angle, lerp_angle_factor)
 	
+	# Change sprite according to mouse
+	mouse_pos = get_global_mouse_position()
+	projectile_deg_rotation = rad_to_deg(global_position.angle_to_point(mouse_pos) - rotation)
+	
+	if (abs(projectile_deg_rotation) < 45) || (abs(projectile_deg_rotation) > 135):
+		sprite_2d.animation = "default"
+	elif projectile_deg_rotation < 0:
+		sprite_2d.animation = "up"
+	else:
+		sprite_2d.animation = "down"
+	
+	sprite_2d.flip_h = abs(projectile_deg_rotation) > 90
 
 func _input(event):
 	direction = Input.get_vector("left", "right", "up", "down")
@@ -40,8 +55,12 @@ func _input(event):
 		
 	if event.is_action_pressed("fire"):
 		var projectile = projectile_scene.instantiate()
-		projectile.transform = global_transform # Projectile à la position/rotation/skew du vaisseau
-		
+		projectile.position = global_position
+		projectile.rotation = rotation + deg_to_rad(projectile_deg_rotation)
+		projectile.direction = Vector2.RIGHT.rotated(projectile.rotation)
+		print(projectile_deg_rotation)
+		print(projectile.rotation)
+		print(projectile.direction)
 		projectile_fire.emit(projectile)
 
 func destroy():

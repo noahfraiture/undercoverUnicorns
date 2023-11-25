@@ -1,7 +1,7 @@
 extends Timer
 
 var max_wait_time = 0.0
-var min_wait_time = 0.1
+var min_wait_time = 0.05
 var iter_before_min = 1000
 var inc = 0
 
