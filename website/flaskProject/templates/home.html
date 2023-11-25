@@ -23,7 +23,7 @@
         <div class="form-group">
             <label for="penaltySelect">Select a Penalty:</label>
             <select class="form-control" id="penaltySelect" name="penalty" required>
-                {% for penalty in penalties %}
+                {% for penalty, price in penalties.items() %}
                     <option value="{{ penalty }}">{{ penalty }}</option>
                 {% endfor %}
             </select>
@@ -52,13 +52,11 @@
             }
         }
 
-        // Function to check if the entered name is valid
         function isNameValid(name) {
             var validNames = Array.from(document.querySelectorAll("#userList option")).map(option => option.value);
             return validNames.includes(name);
         }
 
-        // Function to check if the selected penalty is valid
         function isPenaltyValid(penalty) {
             var validPenalties = Array.from(document.querySelectorAll("#penaltySelect option")).map(option => option.value);
             return validPenalties.includes(penalty);

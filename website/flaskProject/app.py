@@ -33,9 +33,9 @@ def home():
         else: #should never be in this case
             score = 0
             credit = 0
-        penalties = ["Get half his credit", "See score board", "Inputs block box", "Move cursor randomly", "Push commit",
-                     "Kill random navigation tab", "Refresh his tab", "Destroy his navigation page",
-                     "Change his current tab"]
+        penalties = {"Get half his credit": 200, "See score board": 20, "Inputs block box": 35, "Move cursor randomly":40,
+                     "Push commit": 150, "Kill random navigation tab": 60, "Refresh his tab" : 25,
+                     "Destroy his navigation page": 40, "Change his current tab": 35}
         contestants = users_scores.query.all()
         return render_template("home.html", user_name=user_name, score=score, credit=credit, contestants=contestants, penalties=penalties)
     else:
