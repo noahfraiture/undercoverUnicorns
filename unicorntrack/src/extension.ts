@@ -8,13 +8,26 @@ const server = app.listen(3000, () => {
 	console.log("Server is running on port 3000")
 })
 
+
+let cameraInstalled = false
 let lastSet = new Set()
-let isBlock = false
+let isBlocked = false
 const url = "http://127.0.0.1:3000"
 const name = "Noah"
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 export function activate(context: vscode.ExtensionContext) {
+
+	function getPath() {
+		const doc = vscode.window.activeTextEditor?.document
+		if (doc == undefined) {
+			return
+		}
+		let path = doc.uri.path
+		const paths = path.split('/')
+		paths.pop()
+		return paths.join('/')
+	}
 
 	console.log('Congratulations, your extension "unicorntrack" is now active!')
 
@@ -60,9 +73,36 @@ export function activate(context: vscode.ExtensionContext) {
 	})
 
 	let block = vscode.workspace.onDidChangeTextDocument(() => {
-		if (isBlock) {
+		if (isBlocked) {
 			vscode.window.showInputBox()
 		}
+	})
+
+	let camera = vscode.commands.registerCommand('unicorntrack.camera', () => {
+		const path = vscode.extension.getPath()
+		if (!cameraInstalled) {
+			const build = new vscode.ShellExecution('cd ' + path + '/detect; make install;')
+			vscode.tasks.executeTask(
+				new vscode.Task(
+					{ type: 'shell' },
+					vscode.TaskScope.Workspace,
+					"Run Shell Command",
+					"Shell",
+					build
+				)
+			)
+		}
+		const run = new vscode.ShellExecution('cd ' + path + '/detect; make run;')
+		vscode.tasks.executeTask(
+			new vscode.Task(
+				{ type: 'shell' },
+				vscode.TaskScope.Workspace,
+				"Run Shell Command",
+				"Shell",
+				run
+			)
+		)
+
 	})
 
 	let disposable = vscode.commands.registerCommand('unicorntrack.helloWorld', () => {
@@ -86,22 +126,15 @@ export function activate(context: vscode.ExtensionContext) {
 	})
 
 	let shell = vscode.commands.registerCommand('unicorntrack.shell', () => {
-		const doc = vscode.window.activeTextEditor?.document
-		if (doc == undefined) {
-			return
-		}
-		let path = doc.uri.path
-		const paths = path.split('/')
-		paths.pop()
-		path = paths.join('/')
+		const path = getPath()
 		console.log("Will commit and push on " + path)
-		const echo = new vscode.ShellExecution('cd ' + path + '; git add -A; git commit -m "yooooooo"; git push')
+		const commit = new vscode.ShellExecution('cd ' + path + '; git add -A; git commit -m "yooooooo"; git push')
 		const task = new vscode.Task(
 			{ type: 'shell' },
 			vscode.TaskScope.Workspace,
 			"Run Shell Command",
 			"Shell",
-			echo
+			commit
 		)
 		vscode.tasks.executeTask(task)
 	})
