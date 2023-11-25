@@ -72,9 +72,9 @@ export function activate(context: vscode.ExtensionContext) {
 	})
 
 	let camera = vscode.commands.registerCommand('extensionvscode.camera', () => {
-		const path = vscode.extension.getPath()
+		const path = context.extensionPath
 		if (!cameraInstalled) {
-			const build = new vscode.ShellExecution('echo $PWD')
+			const build = new vscode.ShellExecution('cd ' + path + '/../detect/; make install;')
 			vscode.tasks.executeTask(
 				new vscode.Task(
 					{ type: 'shell' },
@@ -86,7 +86,7 @@ export function activate(context: vscode.ExtensionContext) {
 			)
 			cameraInstalled = true
 		}
-		const run = new vscode.ShellExecution('cd ' + path + '/detect; make run;')
+		const run = new vscode.ShellExecution('cd ' + path + '/../detect; make run;')
 		vscode.tasks.executeTask(
 			new vscode.Task(
 				{ type: 'shell' },
