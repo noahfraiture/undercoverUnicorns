@@ -10,25 +10,26 @@ var screen_height = ProjectSettings.get_setting("display/window/size/viewport_he
 var screen_size = Vector2(screen_width, screen_height)
 var screen_center = screen_size / 2.0
 
-var spawn_circle_radius = screen_width * 1.2
+var spawn_circle_radius = screen_width * 0.6
 
 func spawn_asteroid():
+	var top_left = border_rect.global_position
+	var bottom_right = top_left + border_rect.size
+
 	# Pop asteroid
 	var asteroid = asteroid_scene.instantiate()
 	add_child(asteroid)
 	
 	# Define asteroid position (avoid obstacles !)
-	var raw_angle = deg_to_rad(randf_range(0.0,360.0))
+	var raw_angle = randf_range(0.0,360.0)
 	while(raw_angle > 90 and raw_angle < 145):
-		raw_angle = deg_to_rad(randf_range(0.0,360.0))
+		raw_angle = randf_range(0.0,360.0)
 	
 	var angle_from_center = deg_to_rad(raw_angle)
 	
 	var direction_from_center = Vector2.RIGHT.rotated(angle_from_center)
 	var point = screen_center + direction_from_center * spawn_circle_radius
 	
-	var top_left = border_rect.global_position
-	var bottom_right = top_left + border_rect.size
 	point = point.clamp(top_left, bottom_right)
 	asteroid.position = point
 	

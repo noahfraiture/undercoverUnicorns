@@ -45,7 +45,6 @@ script = ExtResource("1_o4p00")
 AsteroidSize_array = Array[ExtResource("2_r4k4f")]([SubResource("Resource_oilrc"), SubResource("Resource_rsxh3"), SubResource("Resource_omllg"), SubResource("Resource_t8lls")])
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
-scale = Vector2(0.8, 0.8)
 texture = ExtResource("5_pddlh")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]

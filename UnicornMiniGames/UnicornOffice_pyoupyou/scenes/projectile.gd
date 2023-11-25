@@ -12,7 +12,9 @@ func _physics_process(delta):
 
 func _on_area_entered(area):
 	if area is Asteroid:
-		area.destroy()
+		if area.is_destroyed == 0:
+			area.is_destroyed = 1.0
+			area.destroy()
 
 func destroy():
 	queue_free()

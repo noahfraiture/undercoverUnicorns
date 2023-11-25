@@ -14,6 +14,8 @@ var Boom8 = preload("res://sprites/BOOM/Boom8.png")
 
 # Variables
 signal destroyed
+var is_destroyed = 0.0 # 0.0 pour false, 1.0 pour projectile, 2.0 pour obstacle
+
 var direction = Vector2.RIGHT
 @export var speed = 200.0
 #@export var torque = 50.0
@@ -55,6 +57,8 @@ func _on_body_entered(body):
 
 func destroy():
 	speed = 0
+	collision_shape_2d.disabled = true
+	destroyed.emit()
 	
 	sprite_2d.texture = Boom1
 	await get_tree().create_timer(0.07).timeout
@@ -72,5 +76,4 @@ func destroy():
 	await get_tree().create_timer(0.07).timeout
 	sprite_2d.texture = Boom8
 	await get_tree().create_timer(0.07).timeout
-	destroyed.emit()
 	queue_free()
