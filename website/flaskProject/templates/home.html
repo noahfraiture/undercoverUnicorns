@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block title %}Office Olympics{% endblock %}
+
+{% block content %}
+
+    <h1>Hello {{ user_name }} and welcome to the Office Olympics!</h1>
+
+    <p>Your current score: {{ score }}</p>
+    <p>Your current ballance: {{ credit }}</p>
+
+    <form method="post" action="{{ url_for('perform_penalties') }}" class="my-4" novalidate>
+        <div class="form-group">
+            <label for="adversarySelect">Select an Adversary:</label>
+            <input type="text" list="userList" class="form-control" id="adversarySelect" name="adversary" placeholder="Search for a user" required>
+            <datalist id="userList">
+                {% for contestant in contestants %}
+                    <option value="{{ contestant.name }}">
+                {% endfor %}
+            </datalist>
+        </div>
+
+        <div class="form-group">
+            <label for="penaltySelect">Select a Penalty:</label>
+            <select class="form-control" id="penaltySelect" name="penalty" required>
+                {% for penalty in penalties %}
+                    <option value="{{ penalty }}">{{ penalty }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <button type="submit" class="btn btn-primary" id="submitButton" disabled>Submit</button>
+    </form>
+
+    <script>
+
+        // Enable the submit button when valid options are selected
+        document.getElementById("adversarySelect").addEventListener("input", enableSubmitButton);
+        document.getElementById("penaltySelect").addEventListener("input", enableSubmitButton);
+
+        function enableSubmitButton() {
+            var adversarySelect = document.getElementById("adversarySelect");
+            var penaltySelect = document.getElementById("penaltySelect");
+            var submitButton = document.getElementById("submitButton");
+
+            // Enable the submit button only if both name and penalty are valid
+            if ((isNameValid(adversarySelect.value.trim()) && isPenaltyValid(penaltySelect.value.trim()))
+            || (penaltySelect.value.trim() == "See score board") ){
+                submitButton.disabled = false;
+            } else {
+                submitButton.disabled = true;
+            }
+        }
+
+        // Function to check if the entered name is valid
+        function isNameValid(name) {
+            var validNames = Array.from(document.querySelectorAll("#userList option")).map(option => option.value);
+            return validNames.includes(name);
+        }
+
+        // Function to check if the selected penalty is valid
+        function isPenaltyValid(penalty) {
+            var validPenalties = Array.from(document.querySelectorAll("#penaltySelect option")).map(option => option.value);
+            return validPenalties.includes(penalty);
+        }
+    </script>
+{% endblock %}
