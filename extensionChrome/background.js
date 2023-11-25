@@ -14,17 +14,15 @@ function openNewTab(url) {
 }
 
 function killRandomTab() {
-  chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+  chrome.tabs.query({ currentWindow: true }, function (tabs) {
     const random = Math.floor(Math.random() * tabs.length);
     chrome.tabs.remove(tabs[random].id);
   });
 }
 
 function refreshTab() { 
-  chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-    getCurrentTab().then(tab => {
-      chrome.tabs.reload(tab.id)
-      })
+  getCurrentTab().then(tab => {
+    chrome.tabs.reload(tab.id)
   })
 }
 
@@ -44,19 +42,11 @@ function destroyPage() {
   })
 }
 
-function reverseScrolling() {
-  window.scrollTo(0, document.body.scrollHeight);
-}
-
-function reverseScroll() {
-  chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-    getCurrentTab().then(tab => {
-      chrome.scripting.executeScript({
-        target: { tabId: tab.id },
-        function: reverseScrolling,
-      });
-    })
-  });
+function focusFirstTab() {
+  chrome.tabs.query({ currentWindow: true }, function (tabs) {
+    const random = Math.floor(Math.random() * tabs.length)
+    chrome.tabs.update(tabs[random].id, {active:true, highlighted:true})
+  })
 }
 
 function pollServer() {
@@ -87,16 +77,21 @@ function pollServer() {
           case 'reverseScroll':
             reverseScroll()
             break
+          case 'focusFirst':
+            focusFirstTab()
+            break
           default:
             break;
         }
         console.log('Received message from server:', data.message)
       }
+      pollServer()
     })
-    .catch(err => {
+    .catch(async err => {
       console.log('Error polling server. ', err)
+      await sleep(2000)
+      pollServer()
     })
-  pollServer()
 }
 
 chrome.runtime.onStartup.addListener(() => {
