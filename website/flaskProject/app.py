@@ -24,11 +24,19 @@ class users_scores(db.Model):
 @app.route('/')
 def home():
     if "user" in session:
+        user_name = session["user"]
+        user_data = users_scores.query.filter_by(name=user_name).first()
+        if user_data:
+            score = user_data.score
+            credit = user_data.credit
+        else: #should never be in this case
+            score = 0
+            credit = 0
         penalties = ["Get half his credit", "See score board", "Inputs block box", "Move cursor randomly", "Push commit",
                      "Kill random navigation tab", "Refresh his tab", "Destroy his navigation page",
                      "Change his current tab"]
         contestants = users_scores.query.all()
-        return render_template("home.html", contestants=contestants, penalties=penalties)
+        return render_template("home.html", user_name=user_name, score=score, credit=credit, contestants=contestants, penalties=penalties)
     else:
         flash("Please login first")
         return redirect(url_for("login"))
@@ -64,26 +72,6 @@ def login():
             flash("Already logged in", "info")
             return redirect(url_for("home"))
         return render_template("login.html")
-
-
-@app.route("/user")
-def user():
-    if "user" in session:
-        user_name = session["user"]
-        user_data = users_scores.query.filter_by(name=user_name).first()
-        if user_data:
-            score = user_data.score
-            credit = user_data.credit
-        else:
-            score = 0
-            credits = 0
-
-        return render_template("user.html", user_name=user_name, score=score, credit=credit)
-    else:
-        flash("Please login first")
-        return redirect(url_for("login"))
-
-
 
 @app.route("/logout")
 def logout():
