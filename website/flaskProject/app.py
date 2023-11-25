@@ -4,7 +4,7 @@ from flask_sqlalchemy import SQLAlchemy
 import requests
 import random
 
-app = Flask(__name__)
+app = Flask(__name__, static_url_path='/static', static_folder='static')
 app.secret_key = "IDontKnowWhatKindOfKeyToPut"
 app.permanent_session_lifetime = timedelta(days=1)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///usersscores.sqlite3'
@@ -273,6 +273,10 @@ def creat_user(users):
             tm = teams_scores(team, score)
             db.session.add(tm)
             db.session.commit()
+
+@app.route('/pyoupyou')
+def pyoupyou():
+    return render_template("pyoupyou/index.html")
 
 
 if __name__ == '__main__':
