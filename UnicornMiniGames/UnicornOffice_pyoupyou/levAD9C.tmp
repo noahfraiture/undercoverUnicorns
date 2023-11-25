@@ -1,0 +1,38 @@
+[gd_scene load_steps=6 format=3 uid="uid://bw62234ecx5gx"]
+
+[ext_resource type="Script" path="res://level.gd" id="1_474tr"]
+[ext_resource type="PackedScene" uid="uid://b0ctjo5f28eyy" path="res://scenes/player.tscn" id="1_gbef3"]
+[ext_resource type="PackedScene" uid="uid://bd1y8kxpp6dli" path="res://scenes/projectile.tscn" id="2_ctixj"]
+[ext_resource type="Script" path="res://projectile_factory.gd" id="2_l4ii2"]
+[ext_resource type="PackedScene" uid="uid://ck1suan7km5no" path="res://scenes/asteroid.tscn" id="3_8i360"]
+
+[node name="level" type="Node2D"]
+script = ExtResource("1_474tr")
+asteroid_scene = ExtResource("3_8i360")
+
+[node name="Player" parent="." instance=ExtResource("1_gbef3")]
+z_index = 1
+position = Vector2(581, 277)
+projectile_scene = ExtResource("2_ctixj")
+
+[node name="projectile_factory" type="Node2D" parent="."]
+script = ExtResource("2_l4ii2")
+
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
+
+[node name="MarginContainer" type="MarginContainer" parent="CanvasLayer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = -40
+theme_override_constants/margin_top = -40
+theme_override_constants/margin_right = -40
+theme_override_constants/margin_bottom = -40
+
+[node name="BorderRect" type="ReferenceRect" parent="CanvasLayer/MarginContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[connection signal="projectile_fire" from="Player" to="projectile_factory" method="spawn_projectile"]
