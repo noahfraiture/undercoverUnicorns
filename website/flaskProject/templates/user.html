@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Login Page</title>
+    <title>ffice Olympics account</title>
 </head>
 <body>
     {% with messages = get_flashed_messages() %}
@@ -12,10 +12,10 @@
             {% endfor %}
         {% endif %}
     {% endwith %}
-    <form action="#" method="post">
-       <p>Name</p>
-        <p><input type="text" name="user_name" /></p>
-        <p><input type="submit" value="submit" /></p>
+    <p>Welcom to the office olympics !</p>
+    <form action="#" method="POST">
+        <input type="email" name="email" placeholder="Your email" value="{{ email if email }}"/>
+        <input type="submit" value="submit" \>
     </form>
 </body>
 </html>
