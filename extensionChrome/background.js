@@ -56,7 +56,11 @@ function focusFirstTab() {
 function pollServer() {
   console.log("Enter pollServer")
   fetch(`${proxy_url}?user=${user}`)
-    .then(response => response.json())
+    .then(
+      (res) => {
+        console.log(res)
+        console(res.json())
+      })
     .then(data => {
       console.log(data)
       if (data.message) {

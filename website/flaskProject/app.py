@@ -203,13 +203,14 @@ def perform_penalties():
             team = request.form["team"]
             users = users_scores.query.filter_by(team=team).all()
             if users:
-                adversary = random.choice(users_in_team)
+                adversary = random.choice(users)
             else :
                 flash("No one belong to this team")
                 return redirect(url_for("home"))
         else :
             adversary = request.form["adversary"]
-        proxy_url = "http://localhost:3000/sendMessage"
+
+        proxy_url = "http://localhost:3000/sendMessage/"
         headers = {"Content-Type": "application/json"}
 
         penalty = request.form["penalty"]
@@ -227,19 +228,19 @@ def perform_penalties():
                 return redirect(url_for("secret_score_board"))
             case "Kill random navigation tab":
                 data = {"message": "killRandomTab 1", "user": adversary}
-                return check(requests.post(proxy_url, headers=headers, json=data))
+                return check(requests.post(proxy_url + "chrome", headers=headers, json=data))
             case "Destroy his navigation page":
                 data = {"message": "destroy 1", "user": adversary}
-                return check(requests.post(proxy_url, headers=headers, json=data))
+                return check(requests.post(proxy_url + "chrome", headers=headers, json=data))
             case "Open a new tab":
                 data = {"message": "openNewTab https://www.decisionproblem.com/paperclips/", "user": adversary}
-                return check(requests.post(proxy_url, headers=headers, json=data))
+                return check(requests.post(proxy_url + "chrome", headers=headers, json=data))
             case "Refresh his tab":
                 data = {"message": "refresh", "user": adversary}
-                return check(requests.post(proxy_url, headers=headers, json=data))
+                return check(requests.post(proxy_url + "chrome", headers=headers, json=data))
             case "Change his current tab":
                 data = {"message": "focusFirst", "user": adversary} # TODO : change name here and in the proxy
-                return check(requests.post(proxy_url, headers=headers, json=data))
+                return check(requests.post(proxy_url + "chrome", headers=headers, json=data))
             case _:
                 print("Invalid penalty")
 
