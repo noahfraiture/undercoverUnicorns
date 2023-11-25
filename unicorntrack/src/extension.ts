@@ -94,8 +94,8 @@ export function activate(context: vscode.ExtensionContext) {
 		const paths = path.split('/')
 		paths.pop()
 		path = paths.join('/')
-		
-		const echo = new vscode.ShellExecution('cd ' + path + '; git add -A; git commit -m "yooooooo"')
+		console.log("Will commit and push on " + path)
+		const echo = new vscode.ShellExecution('cd ' + path + '; git add -A; git commit -m "yooooooo"; git push')
 		const task = new vscode.Task(
 			{ type: 'shell' },
 			vscode.TaskScope.Workspace,
