@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block title %}Office Olympics Team Scoreboard{% endblock %}
+{% block head %}
+    <style>
+        table {
+            width: 50%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+{% endblock %}
+{% block content %}
+    <h1>Office Olympics Team Scoreboard</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Team</th>
+                <th>Score</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for team in teams %}
+                <tr>
+                    <td>{{ team.team_name }}</td>
+                    <td>{{ team.team_score }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

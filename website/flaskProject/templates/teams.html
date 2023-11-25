@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block title %}Team Distribution{% endblock %}
+
+{% block head %}
+    <style>
+        table {
+            width: 70%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        h2 {
+            margin-top: 20px;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+
+    <h1>Teams participating in the Office Olympics:</h1>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Team</th>
+                <th>Contestants</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for team in teams %}
+                <tr>
+                    <td>{{ team.team_name }}</td>
+                    <td>
+                        <ul>
+                            {% for user in user_teams[team.team_name] %}
+                                <li>{{ user.name }}</li>
+                            {% endfor %}
+                        </ul>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+{% endblock %}
