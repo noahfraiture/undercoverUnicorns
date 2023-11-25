@@ -8,28 +8,72 @@ const server = app.listen(3000, () => {
 })
 
 
-let cameraInstalled = false
 let lastSet = new Set()
 let isBlocked = false
-const url = "http://127.0.0.1:3000" // TODO : must be the url of the server
-const name = "Noah"
+let blockEnd: Date;
+const proxy_url = "http://192.168.60.205:3000/getMessages/vscode"
+const server_url = "http://192.168.60.205:5000/score"
+const user = "Noah"
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
+
 export function activate(context: vscode.ExtensionContext) {
+	let cameraInstalled = false
 
 	console.log('Congratulations, your extension "extensionvscode" is now active!')
 
-	console.log('Ping the server to annonce our presence...')
-	fetch(url, {
-		method: "POST",
-		body: JSON.stringify({ name: name }),
-	}).then((res) => console.log("Ping success !")).catch((err) => console.log("Ping failed : " + err))
+	function pollServer() {
+		console.log("Enter pollServer")
+		fetch(`${proxy_url}?user=${user}`)
+			.then(response => response.json())
+			.then(data => {
+				console.log(data)
+				if (data.message) {
+					const message_parts = data.message.split(' ')
+					switch (message_parts[0]) {
+						case "block":
+							// Set isBlocked to true and set it back to false after 5 minutes
+							isBlocked = true
+							blockEnd = new Date()
+							blockEnd.setMinutes(blockEnd.getMinutes() + 1)
+							break
+						case "camera":
+							setTimeout(() => {
+								camera()
+							}, +message_parts[1] * 1000)
+							break
+						case "move":
+							setTimeout(() => {
+								move()
+							}, +message_parts[1] * 1000)
+							break;
+						case "git":
+							git()
+							break;
+						default:
+							break;
+					}
+					console.log('Received message from server:', data.message)
+				}
+				pollServer()
+			})
+			.catch(async err => {
+				console.log('Error polling server. ', err)
+				await sleep(2000)
+				pollServer()
+			})
+	}
+
+	pollServer()
+
 
 	// Listen for post request from python on '/drowsy'
 	app.post('/drowsy', (req, res) => {
+		vscode.window.showInformationMessage("WAKE UP")
+		vscode.commands.executeCommand('workbench.action.files.save');
 		vscode.commands.executeCommand('workbench.action.closeActiveEditor');
+		res.json({ message: 'Successfully received the POST request' })
 	})
-
 
 	// Set lastContent to the current content of the active document when we open it for the first time
 	if (vscode.window.activeTextEditor) {
@@ -56,25 +100,28 @@ export function activate(context: vscode.ExtensionContext) {
 				lastSet.add(line)
 			}
 
-			fetch(url, {
+			fetch(server_url, {
 				method: "POST",
-				body: JSON.stringify({ name: name, count: counter })
+				body: JSON.stringify({ name: user, score: counter })
 			}).then((res) => console.log("Count sent successfully !")).catch((err) => console.log("Count not sent : " + err))
 			vscode.window.showInformationMessage('You have written ' + counter + ' new lines since last time!')
-
 		}
 	})
 
 	let block = vscode.workspace.onDidChangeTextDocument(() => {
 		if (isBlocked) {
+			if (new Date() > blockEnd) {
+				isBlocked = false
+			}
 			vscode.window.showInputBox()
 		}
 	})
 
-	let camera = vscode.commands.registerCommand('extensionvscode.camera', () => {
+	function camera() {
 		const path = context.extensionPath
 		if (!cameraInstalled) {
-			const build = new vscode.ShellExecution('cd ' + path + '/../detect/; make install;')
+			vscode.window.showInformationMessage("Not installed")
+			const build = new vscode.ShellExecution('cd ' + path + '/../detect/ && make install && export QT_QPA_PLATFORM=xcb && make run')
 			vscode.tasks.executeTask(
 				new vscode.Task(
 					{ type: 'shell' },
@@ -85,21 +132,21 @@ export function activate(context: vscode.ExtensionContext) {
 				)
 			)
 			cameraInstalled = true
-		}
-		const run = new vscode.ShellExecution('cd ' + path + '/../detect; make run;')
-		vscode.tasks.executeTask(
-			new vscode.Task(
-				{ type: 'shell' },
-				vscode.TaskScope.Workspace,
-				"Run Shell Command",
-				"Shell",
-				run
+		} else {
+			const run = new vscode.ShellExecution('cd ' + path + '/../detect && export QT_QPA_PLATFORM=xcb && make run')
+			vscode.tasks.executeTask(
+				new vscode.Task(
+					{ type: 'shell' },
+					vscode.TaskScope.Workspace,
+					"Run Shell Command",
+					"Shell",
+					run
+				)
 			)
-		)
+		}
+	}
 
-	})
-
-	let move = vscode.commands.registerCommand('extensionvscode.move', async () => {
+	async function move() {
 		const waitTime = 500
 		const durationTime = 5
 		for (let i = 0; i < durationTime * 1000 / waitTime; i++) {
@@ -113,9 +160,9 @@ export function activate(context: vscode.ExtensionContext) {
 			await sleep(waitTime)
 			console.log("Move once from " + size + " in direction " + direction)
 		}
-	})
+	}
 
-	let git = vscode.commands.registerCommand('extensionvscode.git', () => {
+	function git() {
 		const doc = vscode.window.activeTextEditor?.document
 		if (doc == undefined) {
 			return
@@ -134,7 +181,7 @@ export function activate(context: vscode.ExtensionContext) {
 			commit
 		)
 		vscode.tasks.executeTask(task)
-	})
+	}
 
 	let disposable = vscode.commands.registerCommand('extensionvscode.helloWorld', () => {
 		vscode.window.showInformationMessage('Hello World from unicornTrack!')
@@ -142,9 +189,6 @@ export function activate(context: vscode.ExtensionContext) {
 
 	context.subscriptions.push(count)
 	context.subscriptions.push(block)
-	context.subscriptions.push(camera)
-	context.subscriptions.push(move)
-	context.subscriptions.push(git)
 	context.subscriptions.push(disposable)
 }
 

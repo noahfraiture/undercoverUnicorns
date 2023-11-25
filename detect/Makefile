@@ -1,7 +1,10 @@
+# Makefile
+
+# Target: install - Install Python dependencies
 install:
 	pip install -r requirements.txt
-	export QT_QPA_PLATFORM=xcb
 
+# Target: run
 run:
 	python eye_position.py
 

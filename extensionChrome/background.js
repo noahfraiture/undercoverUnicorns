@@ -1,5 +1,6 @@
 let tracking = false;
-const url = "http://192.168.60.205:3000/getMessages";
+const proxy_url = "http://192.168.60.205:3000/getMessages/chrome";
+const server_url = "http://192.168.60.205:5000/score";
 const user = "Noah";
 let startTime;
 
@@ -54,7 +55,7 @@ function focusFirstTab() {
 
 function pollServer() {
   console.log("Enter pollServer")
-  fetch(`${url}?user=${user}`)
+  fetch(`${proxy_url}?user=${user}`)
     .then(response => response.json())
     .then(data => {
       console.log(data)
@@ -108,6 +109,9 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   }
 });
 
+const batchSize = 10;
+let batchCounter = 0;
+
 chrome.webNavigation.onCompleted.addListener(details => {
 
   console.log("Enter webNavigation.onCompleted")
@@ -134,5 +138,12 @@ chrome.webNavigation.onCompleted.addListener(details => {
       const newPageLoaded = currentPageLoaded + 1;
       chrome.storage.sync.set({ pageLoaded: newPageLoaded });
     });
+    if (batchCounter === batchSize) {
+      fetch(server_url, {
+        method: 'POST',
+        body: JSON.stringify({ user, score: 10 })
+      }).then(() => console.log("Count sent successfully !")).catch(err => console.log("Count not sent : " + err))
+      batchCounter = 0;
+    }
   }
 });
