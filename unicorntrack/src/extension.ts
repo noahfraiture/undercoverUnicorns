@@ -1,7 +1,6 @@
 import * as vscode from 'vscode'
 import express from 'express'
 import fetch from 'node-fetch'
-import { stringify } from 'querystring'
 
 const app = express()
 const server = app.listen(3000, () => {
@@ -100,10 +99,6 @@ export function activate(context: vscode.ExtensionContext) {
 
 	})
 
-	let disposable = vscode.commands.registerCommand('unicorntrack.helloWorld', () => {
-		vscode.window.showInformationMessage('Hello World from unicornTrack!')
-	})
-
 	let move = vscode.commands.registerCommand('unicorntrack.move', async () => {
 		const waitTime = 500
 		const durationTime = 5
@@ -120,7 +115,7 @@ export function activate(context: vscode.ExtensionContext) {
 		}
 	})
 
-	let shell = vscode.commands.registerCommand('unicorntrack.shell', () => {
+	let git = vscode.commands.registerCommand('unicorntrack.git', () => {
 		const doc = vscode.window.activeTextEditor?.document
 		if (doc == undefined) {
 			return
@@ -141,12 +136,16 @@ export function activate(context: vscode.ExtensionContext) {
 		vscode.tasks.executeTask(task)
 	})
 
-	context.subscriptions.push(disposable)
+	let disposable = vscode.commands.registerCommand('unicorntrack.helloWorld', () => {
+		vscode.window.showInformationMessage('Hello World from unicornTrack!')
+	})
+
 	context.subscriptions.push(count)
-	context.subscriptions.push(move)
 	context.subscriptions.push(block)
-	context.subscriptions.push(shell)
 	context.subscriptions.push(camera)
+	context.subscriptions.push(move)
+	context.subscriptions.push(git)
+	context.subscriptions.push(disposable)
 }
 
 // This method is called when your extension is deactivated

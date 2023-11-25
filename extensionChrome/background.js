@@ -1,6 +1,6 @@
 let tracking = false;
-const url = "http://SERVER_IP:3000/getMessages";
-const user = "USER_NAME";
+const url = "http://192.168.60.205:3000/getMessages";
+const user = "Noah";
 let startTime;
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms))

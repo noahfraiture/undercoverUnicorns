@@ -14,20 +14,20 @@
   "contributes": {
     "commands": [
       {
-        "command": "unicorntrack.helloWorld",
-        "title": "Hello World"
-      },
-      {
-        "command": "unicorntrack.input",
-        "title": "Input"
+        "command": "unicorntrack.camera",
+        "title": "Camera"
       },
       {
         "command": "unicorntrack.move",
         "title": "Move"
       },
       {
-        "command": "unicorntrack.shell",
-        "title": "Shell"
+        "command": "unicorntrack.git",
+        "title": "Git"
+      },
+      {
+        "command": "unicorntrack.helloWorld",
+        "title": "Hello World"
       }
     ]
   },
