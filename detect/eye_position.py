@@ -64,8 +64,10 @@ def main():
     start = time.time()
     drowsy_count = 0
     awake_count = 0
+    cycle = 0
+    name = "Drowsy Cam"
 
-    while True:
+    while cycle < 5:
         _, frame = cap.read()
         gray_scale = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
@@ -80,33 +82,34 @@ def main():
             eye_ratio = (left_eye_ratio + right_eye_ratio) / 2
             eye_ratio = round(eye_ratio, 2)
 
-            if eye_ratio < 0.22:
+            if eye_ratio < 0.23:
                 drowsy_count += 1
-                cv2.putText(frame, "Alert!!!! WAKE UP DUDE", (50, 450), cv2.FONT_HERSHEY_PLAIN, 2, (21, 56, 212), 3)
-                cv2.putText(frame, "DROWSINESS DETECTED", (50, 100), cv2.FONT_HERSHEY_PLAIN, 2, (21, 56, 210), 3)
+                cv2.putText(frame, "GO TO WORK", (50, 450), cv2.FONT_HERSHEY_PLAIN, 2, (51, 51, 255), 3)
+                cv2.putText(frame, "Good-for-nothing DETECTED", (50, 100), cv2.FONT_HERSHEY_PLAIN, 2, (51, 51, 255), 3)
             else:
                 awake_count += 1
 
         end = time.time()
-        if end - start >= 1:
-            if drowsy_count * 0.1 > awake_count:
+        if end - start >= 2:
+            if drowsy_count * 0.2 > awake_count:
                 print("You are drowsy")
                 requests.post("http://127.0.0.1:3000/drowsy")
             else:
                 print("You are awake")
             drowsy_count = 0
             awake_count = 0
+            cycle += 1
             start = end
 
-        cv2.imshow("Drowsiness DETECTOR IN OPENCV2", frame)
+        cv2.namedWindow(name)
+        cv2.moveWindow(name, 1500, 700)
+        cv2.imshow(name, frame)
         key = cv2.waitKey(9)
         if key == 20:
             break
 
     cap.release()
     cv2.destroyAllWindows()
-
-def send_drowsy():
 
 
 if __name__ == "__main__":

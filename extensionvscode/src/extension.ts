@@ -8,7 +8,6 @@ const server = app.listen(3000, () => {
 })
 
 
-let cameraInstalled = false
 let lastSet = new Set()
 let isBlocked = false
 const url = "http://127.0.0.1:3000" // TODO : must be the url of the server
@@ -16,6 +15,7 @@ const name = "Noah"
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 export function activate(context: vscode.ExtensionContext) {
+	let cameraInstalled = false
 
 	console.log('Congratulations, your extension "extensionvscode" is now active!')
 
@@ -27,7 +27,10 @@ export function activate(context: vscode.ExtensionContext) {
 
 	// Listen for post request from python on '/drowsy'
 	app.post('/drowsy', (req, res) => {
+		vscode.window.showInformationMessage("WAKE UP")
+		vscode.commands.executeCommand('workbench.action.files.save');
 		vscode.commands.executeCommand('workbench.action.closeActiveEditor');
+		res.json({message: 'Successfully received the POST request'})
 	})
 
 
@@ -74,7 +77,8 @@ export function activate(context: vscode.ExtensionContext) {
 	let camera = vscode.commands.registerCommand('extensionvscode.camera', () => {
 		const path = context.extensionPath
 		if (!cameraInstalled) {
-			const build = new vscode.ShellExecution('cd ' + path + '/../detect/; make install;')
+			vscode.window.showInformationMessage("Not installed")
+			const build = new vscode.ShellExecution('cd ' + path + '/../detect/ && make install && export QT_QPA_PLATFORM=xcb && make run')
 			vscode.tasks.executeTask(
 				new vscode.Task(
 					{ type: 'shell' },
@@ -85,18 +89,18 @@ export function activate(context: vscode.ExtensionContext) {
 				)
 			)
 			cameraInstalled = true
-		}
-		const run = new vscode.ShellExecution('cd ' + path + '/../detect; make run;')
-		vscode.tasks.executeTask(
-			new vscode.Task(
-				{ type: 'shell' },
-				vscode.TaskScope.Workspace,
-				"Run Shell Command",
-				"Shell",
-				run
+		} else {
+			const run = new vscode.ShellExecution('cd ' + path + '/../detect && export QT_QPA_PLATFORM=xcb && make run')
+			vscode.tasks.executeTask(
+				new vscode.Task(
+					{ type: 'shell' },
+					vscode.TaskScope.Workspace,
+					"Run Shell Command",
+					"Shell",
+					run
+				)
 			)
-		)
-
+		}
 	})
 
 	let move = vscode.commands.registerCommand('extensionvscode.move', async () => {
