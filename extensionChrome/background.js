@@ -1,4 +1,6 @@
 let tracking = false;
+const url = "http://SERVER_IP:3000/getMessages";
+const user = "USER_NAME";
 let startTime;
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
@@ -51,7 +53,7 @@ function focusFirstTab() {
 
 function pollServer() {
   console.log("Enter pollServer")
-  fetch('http://localhost:3000/getMessages')
+  fetch(`${url}?user=${user}`)
     .then(response => response.json())
     .then(data => {
       console.log(data)

@@ -147,17 +147,11 @@ def perform_penalties():
             session['penalties_performed'] = True
             return redirect(url_for("score_board"))
         elif request.form["penalty"] == "Kill random navigation tab": #Marche pas
-            print("here")
             adversary = request.form["adversary"]
-            print("here1")
-            url = "http://192.168.60.205:3000/sendMessage"
-            print("here2")
+            url = "http://localhost:3000/sendMessage"
             headers = {"Content-Type": "application/json"}
-            print("here3")
             data = {"message": "killRandomTab 1"}
-            print("here4")
-            response = requests.post(url, headers=headers, data=data)
-            print("here5")
+            response = requests.post(url, headers=headers, data=data) # TODO : repair
             if response.status_code == 200:
                 flash("uhum that wasn't really nice, oh well")
             else:
