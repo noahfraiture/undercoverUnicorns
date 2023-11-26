@@ -21,7 +21,7 @@ export function activate(context: vscode.ExtensionContext) {
 
   console.log('Congratulations, your extension "extensionvscode" is now active!')
 
-  let poll = vscode.commands.registerCommand('extensionvscode.pollServer', () => {
+  function pollServer() {
     console.log("Enter pollServer")
     fetch(`${proxy_messages}?user=${user}`)
       .then(response => response.json())
@@ -31,7 +31,7 @@ export function activate(context: vscode.ExtensionContext) {
           const message_parts = data.message.split(' ')
           console.log(message_parts)
           switch (message_parts[0]) {
-              // TODO : add time
+            // TODO : add time
             case "block":
               isBlocked = true
               blockEnd = new Date()
@@ -51,8 +51,15 @@ export function activate(context: vscode.ExtensionContext) {
           }
           console.log('Received message from server:', data.message)
         }
+        pollServer()
       })
-  })
+    .catch(async (err) => {
+        console.log(err)
+        await sleep(2000)
+        pollServer()
+    })
+  }
+  pollServer()
 
 
   // Set lastContent to the current content of the active document when we open it for the first time
@@ -187,7 +194,6 @@ export function activate(context: vscode.ExtensionContext) {
     vscode.window.showInformationMessage('Hello World from unicornTrack!')
   })
 
-  context.subscriptions.push(poll)
   context.subscriptions.push(count)
   context.subscriptions.push(block)
   context.subscriptions.push(disposable)

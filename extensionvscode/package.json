@@ -14,10 +14,6 @@
   "contributes": {
     "commands": [
       {
-        "command": "extensionvscode.pollServer",
-        "title": "Poll"
-      },
-      {
         "command": "extensionvscode.helloWorld",
         "title": "Hello World"
       }

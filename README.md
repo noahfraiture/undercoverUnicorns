@@ -1,7 +1,13 @@
 ## WORKS
 
-All chromium punishments when the users is logged
+Chromium punishments when the users is logged
 Chromium send stats to proxy
+
+VsCode punishments when the user is logged in. Keep focus does not work on stack
+VsCode send stats to proxy 
+
+proxy send stats to server
+
 
 ## DOES NOT WORK
 
