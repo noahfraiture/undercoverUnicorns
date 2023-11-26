@@ -19,7 +19,7 @@ penalties = {
     "VsCode : Keep your eyes open": 100,
     "VsCode : Inputs block box": 35,
     "VsCode : Move cursor randomly":40,
-    "VsCode : Push commit": 150,
+    "VsCode : New commit": 150,
     "Chromium : Kill random navigation tab": 60,
     "Chromium : Refresh his tab" : 25,
     "Chromium : Destroy his navigation page": 40,
@@ -256,7 +256,6 @@ def perform_penalties():
         proxy_url = "http://localhost:3000/sendMessage/"
         headers = {"Content-Type": "application/json"}
 
-        print(request.form)
         penalty = request.form["penalty"]
         price = penalties[penalty]
         if credit < price:
@@ -289,7 +288,7 @@ def perform_penalties():
             case "VsCode : Move cursor randomly":
                 data = {"message": "move", "user": adversary}
                 return check(requests.post(proxy_url + "vscode", headers=headers, json=data))
-            case "VsCode : Push commit":
+            case "VsCode : New commit":
                 data = {"message": "git", "user": adversary}
                 return check(requests.post(proxy_url + "vscode", headers=headers, json=data))
 

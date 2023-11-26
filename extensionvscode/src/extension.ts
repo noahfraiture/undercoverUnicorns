@@ -24,8 +24,9 @@ export function activate(context: vscode.ExtensionContext) {
   function pollServer() {
     console.log("Enter pollServer")
     fetch(`${proxy_messages}?user=${user}`)
-      .then(response => response.json())
-      .then(data => {
+      .then((response) => response.json())
+      .then(async data => {
+        await sleep(500)
         console.log(data)
         if (data.message) {
           const message_parts = data.message.split(' ')

@@ -16,7 +16,7 @@ func send_score():
 	if http_request:
 		var data = {"score": score}
 		var body = json.print(data)
-		http_request.request("http://127.0.0.1:5000/receive_score", [], HTTPClient.METHOD_POST, body)
+		http_request.request("http://192.168.60.205:5000/receive_score", [], HTTPClient.METHOD_POST, body)
 
 func activate_request():
 	http_request.set_process(true)  # Manually activate the HTTPRequest node

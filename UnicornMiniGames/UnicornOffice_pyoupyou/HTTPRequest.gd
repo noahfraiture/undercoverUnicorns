@@ -6,7 +6,7 @@ var ScoreLabel
 func _ready():
 	ScoreLabel = get_parent().get_parent().get_node("ScoreLabel")
 	connect("request_completed", _on_request_completed)
-	request("http://127.0.0.1:5000/get_score", [], HTTPClient.METHOD_GET)
+	request("http://192.168.60.205:5000/get_score", [], HTTPClient.METHOD_GET)
 
 
 func _on_request_completed(result, response_code, headers, body):
