@@ -276,7 +276,7 @@ def creat_user(users):
 
 @app.route('/pyoupyou')
 def pyoupyou():
-    return render_template("pyoupyou/index.html")
+    return render_template('redirect_template.html', target_url="http://localhost:8000")
 
 
 if __name__ == '__main__':
