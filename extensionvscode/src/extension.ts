@@ -10,8 +10,8 @@ const server = app.listen(3001, "127.0.0.1", () => {
 let lastSet = new Set()
 let isBlocked = false
 let blockEnd: Date;
-const proxy_messages = "http://192.168.60.205:3000/getMessages/vscode"
-const proxy_score = "http://192.168.60.205:3000/addScore"
+const proxy_messages = "http://127.0.0.1:3000/getMessages/vscode"
+const proxy_score = "http://127.0.0.1:3000/addScore"
 const user = "Noah"
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 

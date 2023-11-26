@@ -4,7 +4,7 @@ const fetch = require('node-fetch')
 const app = express()
 const port = 3000
 const server_port = 5000
-const server_url = 'http://192.168.60.205:5000/score'
+const server_url = 'http://127.0.0.1:5000/score'
 
 // string: List
 let chromeQueue = new Map()
