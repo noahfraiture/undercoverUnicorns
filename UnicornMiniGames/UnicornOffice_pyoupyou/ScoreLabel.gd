@@ -7,5 +7,7 @@ func _on_asteroid_destroyed(asteroid):
 	if(asteroid.is_destroyed == 1):
 		score += 1
 	best = max(score, best)
-	text = "Score: %d\nbest: %d" % [score, best]
 
+func _physics_process(delta):
+	best = max(score, best)
+	text = "Score: %d\nbest: %d" % [score, best]

@@ -176,7 +176,7 @@ def score():
             return "Invalid request format. Make sure to include 'user' and 'score' in the JSON data."
         user_data = users_scores.query.filter_by(name=current_user).first()
         if user_data:
-            user_data.pyoupyou_score += score_to_add
+            user_data.score += score_to_add
             db.session.commit()
             team_data = teams_scores.query.filter_by(team_name=user_data.team).first()
             if team_data:
@@ -366,29 +366,44 @@ def get_score():
     game_user_data = new_scores.query.filter_by(name=game_user).first()
     if game_user_data:
         print("sending pyoupyou_score:", game_user_data.pyoupyou_best_score)
-        return jsonify({"result": game_user_data.pyoupyou_best_score})
+        return jsonify({"pyoupyou_score": game_user_data.pyoupyou_best_score, "platformer_score": game_user_data.platformer_best_score})
     return None
 
 @app.route('/receive_score', methods=['POST'])
 def receive_score():
     data = request.get_json()
-    if 'pyoupyou_score' in data:
-        game_score = data['pyoupyou_score']
-        print("Received pyoupyou_score:", game_score)
+    if 'pyoupyou_score' in data or 'platformer_score' in data:
         game_user = session["user"]
         game_user_data = new_scores.query.filter_by(name=game_user).first()
         if game_user_data :
-            if game_user_data.pyoupyou_score < game_score :
-                game_user_data.pyoupyou_score = game_score
+            if 'pyoupyou_score' in data:
+                game_score = data['pyoupyou_score']
+                print("Received pyoupyou_score:", game_score)
+                if game_user_data.pyoupyou_score < game_score:
+                    game_user_data.pyoupyou_score = game_score
+                    db.session.commit()
+                if game_user_data.pyoupyou_best_score < game_score:
+                    game_user_data.pyoupyou_best_score = game_score
+                    db.session.commit()
+                game_user_data.pyoupyou_times_play += 1
                 db.session.commit()
-            if game_user_data.pyoupyou_best_score < game_score :
-                game_user_data.pyoupyou_best_score = game_score
+            else:
+                game_score = data['platformer_score']
+                print("Received platformer_score:", game_score)
+                if game_user_data.platformer_score < game_score:
+                    game_user_data.platformer_score = game_score
+                    db.session.commit()
+                if game_user_data.platformer_best_score < game_score:
+                    game_user_data.platformer_best_score = game_score
+                    db.session.commit()
+                game_user_data.platformer_times_play += 1
                 db.session.commit()
-            game_user_data.pyoupyou_times_play += 1
-            db.session.commit()
         else :
             user_team = users_scores.query.filter_by(name=game_user).first().team
-            nw_scr = new_scores(game_user, user_team, game_score, game_score, 1)
+            if 'pyoupyou_score' in data:
+                nw_scr = new_scores(game_user, user_team, data['pyoupyou_score'], data['pyoupyou_score'], 1, 0, 0, 0)
+            else :
+                nw_scr = new_scores(game_user, user_team, 0, 0, 0, data['platformer_score'], data['platformer_score'], 1)
             db.session.add(nw_scr)
             db.session.commit()
         return "Score received successfully!", 200
@@ -401,10 +416,14 @@ def add_score():
         contestants = new_scores.query.all()
         for contestant in contestants :
             user = contestant.name
-            credit_to_add = contestant.pyoupyou_score
+            credit_to_add = contestant.pyoupyou_score + contestant.platformer_score
             contestant.pyoupyou_score = 0
             db.session.commit()
+            contestant.platformer_score = 0
+            db.session.commit()
             contestant.pyoupyou_times_play = 0
+            db.session.commit()
+            contestant.platformer_times_play = 0
             db.session.commit()
             user_data = users_scores.query.filter_by(name=user).first()
             if user_data:
