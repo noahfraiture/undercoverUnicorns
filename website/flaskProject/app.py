@@ -316,6 +316,23 @@ def add_header(response):
 def pyoupyou():
     return render_template("game_template.html", connected="user" in session)
 
+game_score = 0
+@app.route('/get_score', methods=['GET'])
+def get_score():
+    global game_score
+    print("sending score:", game_score)
+    return jsonify({"result": game_score})
+
+@app.route('/receive_score', methods=['POST'])
+def receive_score():
+    global game_score
+    data = request.get_json()
+    if 'score' in data:
+        print("Received score:", game_score)
+        game_score = max(data['score'], game_score)
+        return "Score received successfully!", 200
+    else:
+        return "Score data not found in request", 400
 
 if __name__ == '__main__':
     with app.app_context():
