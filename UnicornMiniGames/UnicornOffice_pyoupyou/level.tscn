@@ -2824,6 +2824,9 @@ z_index = 1
 position = Vector2(581, 277)
 projectile_scene = ExtResource("2_ctixj")
 
+[node name="HTTPRequest" type="HTTPRequest" parent="Player"]
+script = ExtResource("12_nof2y")
+
 [node name="projectile_factory" type="Node2D" parent="."]
 script = ExtResource("2_l4ii2")
 
@@ -2959,9 +2962,6 @@ offset_bottom = 53.0
 text = "Score : 0
 Best : 0"
 script = ExtResource("11_x5bf0")
-
-[node name="HTTPRequest" type="HTTPRequest" parent="."]
-script = ExtResource("12_nof2y")
 
 [connection signal="destroyed" from="Player" to="." method="_on_player_destroyed"]
 [connection signal="projectile_fire" from="Player" to="projectile_factory" method="spawn_projectile"]
