@@ -88,7 +88,7 @@ app.get('/getMessages/vscode', (req, res) => {
   const waitForMessage = () => {
     if (queue.length > 0) {
       res.json({ message: queue.shift() })
-      console.log("Query served for user " + user)
+      console.log("Query vscode served for user " + user)
     } else {
       setTimeout(waitForMessage, 1000)
     }
@@ -97,3 +97,4 @@ app.get('/getMessages/vscode', (req, res) => {
 })
 
 app.listen(port, () => console.log(`Server listening on port ${port}`))
+

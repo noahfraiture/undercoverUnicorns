@@ -14,16 +14,8 @@
   "contributes": {
     "commands": [
       {
-        "command": "extensionvscode.camera",
-        "title": "Camera"
-      },
-      {
-        "command": "extensionvscode.move",
-        "title": "Move"
-      },
-      {
-        "command": "extensionvscode.git",
-        "title": "Git"
+        "command": "extensionvscode.pollServer",
+        "title": "Poll"
       },
       {
         "command": "extensionvscode.helloWorld",

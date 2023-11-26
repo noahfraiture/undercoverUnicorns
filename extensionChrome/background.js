@@ -1,7 +1,6 @@
 let tracking = false;
 const proxy_url = "http://192.168.60.205:3000/getMessages/chrome";
 const proxy_score = "http://192.168.60.205:3000/addScore";
-const server_url = "http://192.168.60.205:5000/score";
 const user = "Noah";
 let startTime;
 
