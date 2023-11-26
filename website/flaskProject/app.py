@@ -214,6 +214,7 @@ def credit():
 @app.route("/perform_penalties", methods=["POST", "GET"])
 def perform_penalties():
     user_data = None
+    adversary_data = None
     if "user" in session:
         user_name = session["user"]
         user_data = users_scores.query.filter_by(name=user_name).first()
@@ -231,12 +232,14 @@ def perform_penalties():
             team = request.form["team"]
             users = users_scores.query.filter_by(team=team).all()
             if users:
-                adversary = random.choice(users)
+                adversary_data = random.choice(users)
+                adversary = adversary_data.name
             else :
                 flash("No one belong to this team")
                 return redirect(url_for("home"))
         else :
             adversary = request.form["adversary"]
+            adversary_data = users_scores.query.filter_by(name=adversary).first()
 
         proxy_url = "http://localhost:3000/sendMessage/"
         headers = {"Content-Type": "application/json"}
@@ -255,8 +258,11 @@ def perform_penalties():
 
             # General
             case "Get half his credit":
-                # TODO 
-                print("Not implemented yet")
+                user_data.credit  += adversary_data.credit // 2
+                db.session.commit()
+                adversary_data.credit = adversary_data.credit // 2
+                db.session.commit()
+                return redirect(url_for("home"))
             case "See score board":
                 session['penalties_performed'] = True
                 return redirect(url_for("secret_score_board"))
@@ -331,6 +337,13 @@ def add_header(response):
 
 @app.route('/pyoupyou')
 def pyoupyou():
+    if "user" in session :
+        game_user = session["user"]
+        game_user_data = new_scores.query.filter_by(name=game_user).first()
+        if game_user_data:
+            if  game_user_data.times_play >= 5:
+                flash("Stop playing, go back to work NOW")
+                return redirect(url_for("home"))
     return render_template("game_template.html", connected="user" in session)
 
 @app.route('/get_score', methods=['GET'])
@@ -357,6 +370,8 @@ def receive_score():
             if game_user_data.best_score < game_score :
                 game_user_data.best_score = game_score
                 db.session.commit()
+            game_user_data.times_play += 1
+            db.session.commit()
         else :
             user_team = users_scores.query.filter_by(name=game_user).first().team
             nw_scr = new_scores(game_user, user_team, game_score, game_score, 1)
