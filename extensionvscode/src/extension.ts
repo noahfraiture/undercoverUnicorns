@@ -3,10 +3,9 @@ import express from 'express'
 import fetch from 'node-fetch'
 
 const app = express()
-const server = app.listen(3000, () => {
-	console.log("Server is running on port 3000")
+const server = app.listen(3001, "127.0.0.1", () => {
+	console.log("Server is running on port 3001")
 })
-
 
 let lastSet = new Set()
 let isBlocked = false
@@ -81,6 +80,9 @@ export function activate(context: vscode.ExtensionContext) {
         lastSet.add(line)
       }
 
+      if (counter == 0) {
+        return;
+      }
       const data = { "user":user, "score":counter }
       console.log(data)
       fetch(proxy_score, {

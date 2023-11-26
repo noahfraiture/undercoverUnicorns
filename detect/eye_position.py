@@ -82,7 +82,7 @@ def main():
             eye_ratio = (left_eye_ratio + right_eye_ratio) / 2
             eye_ratio = round(eye_ratio, 2)
 
-            if eye_ratio < 0.23:
+            if eye_ratio < 0.25:
                 drowsy_count += 1
                 cv2.putText(frame, "GO TO WORK", (50, 450), cv2.FONT_HERSHEY_PLAIN, 2, (51, 51, 255), 3)
                 cv2.putText(frame, "Good-for-nothing DETECTED", (50, 100), cv2.FONT_HERSHEY_PLAIN, 2, (51, 51, 255), 3)
@@ -93,7 +93,7 @@ def main():
         if end - start >= 2:
             if drowsy_count * 0.2 > awake_count:
                 print("You are drowsy")
-                requests.post("http://127.0.0.1:3000/drowsy")
+                requests.post("http://127.0.0.1:3001/drowsy")
             else:
                 print("You are awake")
             drowsy_count = 0
