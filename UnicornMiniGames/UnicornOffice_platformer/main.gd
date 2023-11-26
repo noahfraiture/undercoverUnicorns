@@ -2,6 +2,7 @@ extends Node2D
 
 @onready var heartsContainer = $CanvasLayer/HeartsContainer
 @onready var thePlayer = $Player
+var time = 0.0
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
@@ -10,4 +11,10 @@ func _ready():
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta):
-	pass
+	time += 0.05
+
+
+
+func _on_victory_area_entered(area):
+	print("Victory")
+	pass # Envoyer time !!

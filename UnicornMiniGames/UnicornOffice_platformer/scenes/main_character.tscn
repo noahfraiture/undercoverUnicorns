@@ -405,7 +405,7 @@ scale = Vector2(3.17188, 3.25)
 sprite_frames = SubResource("SpriteFrames_3xyy4")
 animation = &"attack"
 autoplay = "default"
-frame_progress = 0.404409
+frame_progress = 0.467435
 
 [node name="ColorRect" type="ColorRect" parent="Sprite2D"]
 offset_left = -19.0
@@ -439,6 +439,8 @@ one_shot = true
 [node name="Frapper" parent="Node2D" instance=ExtResource("4_ql5i2")]
 position = Vector2(-8, -16)
 scale = Vector2(0.5, 0.5)
+collision_layer = 4
+collision_mask = 0
 
 [node name="Sprite2D" type="Sprite2D" parent="Node2D"]
 visible = false

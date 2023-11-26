@@ -1,6 +1,8 @@
 extends CharacterBody2D
 class_name FrogNinja
 
+@onready var death_timer = $DeathTimer
+
 # Variables
 const JUMP_VELOCITY = -1200.0
 const SPEED = 300.0
@@ -12,6 +14,7 @@ var temp
 var start_position
 var destinationX
 var hit = 0
+var dead = false
 
 # Get the gravity from the project settings to be synced with RigidBody nodes.
 var gravity = ProjectSettings.get_setting("physics/2d/default_gravity")
@@ -51,7 +54,9 @@ func move_and_anim(delta):
 
 
 func _physics_process(delta):
-	if hit > 0:
+	if dead:
+		sprite_2d.animation = "hit"
+	elif hit > 0:
 		sprite_2d.animation = "hit"
 		velocity = Vector2.ZERO
 		if hit < 30 && not is_on_floor():
@@ -60,3 +65,12 @@ func _physics_process(delta):
 	else:		
 		init_and_reset()
 		move_and_anim(delta)
+
+
+func _on_real_hit_box_area_entered(area):
+	if area != $Hitbox:
+		print("GOO")
+		dead = true
+		death_timer.start()
+		await death_timer.timeout
+		queue_free()

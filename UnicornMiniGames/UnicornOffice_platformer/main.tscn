@@ -1,4 +1,4 @@
-[gd_scene load_steps=20 format=3 uid="uid://d24yei41j3tg1"]
+[gd_scene load_steps=21 format=3 uid="uid://d24yei41j3tg1"]
 
 [ext_resource type="Script" path="res://main.gd" id="1_krdlg"]
 [ext_resource type="Script" path="res://Camera2D.gd" id="2_b13o4"]
@@ -11,6 +11,7 @@
 [ext_resource type="Texture2D" uid="uid://d05x3wkier464" path="res://images/tilesets/Room_Builder_Walls_48x48.png" id="8_6rtmx"]
 [ext_resource type="PackedScene" uid="uid://capqubvjih3d1" path="res://scenes/frog_ninja.tscn" id="9_6c0hv"]
 [ext_resource type="PackedScene" uid="uid://d22jgfbtobgry" path="res://scenes/hearts_container.tscn" id="10_6untr"]
+[ext_resource type="PackedScene" uid="uid://b3d1ahk1tjf8h" path="res://victory.tscn" id="12_ky18l"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_x61ix"]
 texture = ExtResource("3_kqb4j")
@@ -37409,5 +37410,7 @@ scale = Vector2(3, 3)
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
 
 [node name="HeartsContainer" parent="CanvasLayer" instance=ExtResource("10_6untr")]
+
+[node name="Victory" parent="." instance=ExtResource("12_ky18l")]
 
 [connection signal="healthChanged" from="Player" to="CanvasLayer/HeartsContainer" method="_on_player_health_changed"]

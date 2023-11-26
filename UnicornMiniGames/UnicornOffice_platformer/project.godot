@@ -51,6 +51,7 @@ attack={
 
 2d_physics/layer_1="PlayerLayer"
 2d_physics/layer_2="EnemyLayer"
+2d_physics/layer_3="Hitboxes"
 
 [physics]
 

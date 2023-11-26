@@ -1,0 +1,18 @@
+[gd_scene load_steps=4 format=3 uid="uid://b3d1ahk1tjf8h"]
+
+[ext_resource type="Script" path="res://Victory.gd" id="1_nluvs"]
+[ext_resource type="Texture2D" uid="uid://b1qj1uqg40ab3" path="res://images/BigTreasureChest.png" id="2_7lo8d"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_f4rfs"]
+size = Vector2(16, 12)
+
+[node name="Victory" type="Area2D"]
+script = ExtResource("1_nluvs")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+texture = ExtResource("2_7lo8d")
+hframes = 2
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(0, 1)
+shape = SubResource("RectangleShape2D_f4rfs")
