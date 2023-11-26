@@ -58,7 +58,8 @@ function pollServer() {
   console.log("Enter pollServer")
   fetch(`${proxy_url}?user=${user}`)
     .then(res => res.json())
-    .then(data => {
+    .then(async data => {
+      await sleep(500)
       console.log(data)
       if (data.message) {
         const message_parts = data.message.split(' ')

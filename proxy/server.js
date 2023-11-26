@@ -57,6 +57,7 @@ app.post('/addScore', (req, res) => {
 })
 
 app.get('/getMessages/chrome', (req, res) => {
+  // BUG : automatically query even without the process
   const user = req.query.user
   console.log("User " + user + " is querying for chrome messages")
 
@@ -65,12 +66,20 @@ app.get('/getMessages/chrome', (req, res) => {
   }
 
   let queue = chromeQueue.get(user)
+  const waitTime = 30
+  let count = waitTime
   const waitForMessage = () => {
     if (queue.length > 0) {
       res.json({ message: queue.shift() })
       console.log("Query chrome served for user " + user)
     } else {
-      setTimeout(waitForMessage, 1000)
+      if (count == 0) {
+        count = waitTime
+        res.json({ message: "No new message" })
+      } else {
+        count--;
+        setTimeout(waitForMessage, 1000)
+      }
     }
   }
   waitForMessage();
@@ -85,12 +94,20 @@ app.get('/getMessages/vscode', (req, res) => {
   }
 
   let queue = vscodeQueue.get(user)
+  const waitTime = 30
+  let count = waitTime
   const waitForMessage = () => {
     if (queue.length > 0) {
       res.json({ message: queue.shift() })
       console.log("Query vscode served for user " + user)
     } else {
-      setTimeout(waitForMessage, 1000)
+      if (count == 0) {
+        count = waitTime
+        res.json({ message: "No new message" })
+      } else {
+        count--;
+        setTimeout(waitForMessage, 1000)
+      }
     }
   }
   waitForMessage();

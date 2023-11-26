@@ -224,7 +224,6 @@ def perform_penalties():
         proxy_url = "http://localhost:3000/sendMessage/"
         headers = {"Content-Type": "application/json"}
 
-        print(request.form)
         penalty = request.form["penalty"]
         price = penalties[penalty]
         if credit < price:
