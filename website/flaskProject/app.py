@@ -274,9 +274,15 @@ def creat_user(users):
             db.session.add(tm)
             db.session.commit()
 
+@app.after_request
+def add_header(response):
+    response.headers['Cross-Origin-Opener-Policy'] = 'same-origin'
+    response.headers['Cross-Origin-Embedder-Policy'] = 'require-corp'
+    return response
+
 @app.route('/pyoupyou')
 def pyoupyou():
-    return render_template('redirect_template.html', target_url="http://localhost:8000")
+    return render_template("game_template.html")
 
 
 if __name__ == '__main__':
