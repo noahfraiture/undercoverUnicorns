@@ -64,6 +64,7 @@ func _input(event):
 		$FireTimer.start()
 
 
+signal ready_to_close
 func _on_fire_timer_timeout():
 	if Input.is_action_pressed("fire"):
 		var fire = InputEventAction.new()
@@ -71,11 +72,15 @@ func _on_fire_timer_timeout():
 		fire.pressed = true
 		Input.parse_input_event(fire)
 
-
 func destroy():
-	var server = get_parent().get_node("HTTPRequest")
-	server.tnext = server.time-1
-	await get_tree().create_timer(0.1).timeout
+	var ScoreLabel = get_parent().get_node("ScoreLabel")
+	var headers = ["Content-Type: application/json"]
+	var json_string = "{\"score\": %s}" % ScoreLabel.score
+	$HTTPRequest.request("http://127.0.0.1:5000/receive_score", headers, HTTPClient.METHOD_POST, json_string)
+
+	# get_parent().httsend = true
+	await ready_to_close
+	print("destroy")
 	destroyed.emit()
 	queue_free()
 

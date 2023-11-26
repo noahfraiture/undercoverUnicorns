@@ -3,6 +3,8 @@ from datetime import timedelta
 from flask_sqlalchemy import SQLAlchemy
 import requests
 import random
+from apscheduler.schedulers.background import BackgroundScheduler
+
 
 app = Flask(__name__, static_url_path='/static', static_folder='static')
 app.secret_key = "IDontKnowWhatKindOfKeyToPut"
@@ -47,6 +49,26 @@ class teams_scores(db.Model):
         self.team_name = team_name
         self.team_score = team_score
 
+class new_scores(db.Model):
+    _id = db.Column("id", db.Integer, primary_key=True)
+    name = db.Column("name", db.String(100))
+    team = db.Column("team", db.String(100))
+    pyoupyou_score = db.Column("pyoupyou_score", db.Integer)
+    pyoupyou_best_score = db.Column("pyoupyou_best_score", db.Integer)
+    pyoupyou_times_play = db.Column("pyoupyou_times_play", db.Integer)
+    platformer_score = db.Column("platformer_score", db.Integer)
+    platformer_best_score = db.Column("platformer_best_score", db.Integer)
+    platformer_times_play = db.Column("platformer_times_play", db.Integer)
+
+    def __init__(self, name, team, pyou_pyouscore, pyoupyou_best_score, pyoupyou_times_play, platformer_score, platformer_best_score, platformer_times_play):
+        self.name = name
+        self.team = team
+        self.pyoupyou_score = pyou_pyouscore
+        self.pyoupyou_best_score = pyoupyou_best_score
+        self.pyoupyou_times_play = pyoupyou_times_play
+        self.platformer_score = platformer_score
+        self.platformer_best_score = platformer_best_score
+        self.platformer_times_play = platformer_times_play
 
 @app.route('/')
 def home():
@@ -78,8 +100,12 @@ def secret_score_board():
 
 @app.route('/team_scoreboard')
 def team_scoreboard():
-    teams = teams_scores.query.all()
-    return render_template('teams_scoreboard.html', teams=teams, connected="user" in session)
+    if "user" in session :
+        teams = teams_scores.query.all()
+        return render_template('teams_scoreboard.html', teams=teams, connected="user" in session)
+    else :
+        flash("Please login first")
+        return redirect(url_for("login"))
 
 
 @app.route('/login', methods=["POST", "GET"])
@@ -94,6 +120,9 @@ def login():
             session["credit"] = user_data.credit
         else :
             flash(f"No user named {user}")
+            session.pop("user", None)
+            session.pop("score", None)
+            session.pop("credit", None)
             return render_template("login.html", connected="user" in session)
         flash("Succesfully logged in", "info")
         return redirect(url_for("home"))
@@ -147,7 +176,7 @@ def score():
             return "Invalid request format. Make sure to include 'user' and 'score' in the JSON data."
         user_data = users_scores.query.filter_by(name=current_user).first()
         if user_data:
-            user_data.score += score_to_add
+            user_data.pyoupyou_score += score_to_add
             db.session.commit()
             team_data = teams_scores.query.filter_by(team_name=user_data.team).first()
             if team_data:
@@ -180,7 +209,7 @@ def credit():
             db.session.commit()
             team_data = teams_scores.query.filter_by(team_name=user_data.team).first()
             if team_data:
-                team_data.team_score += score
+                team_data.team_score += credit_to_add
                 db.session.commit()
             return "Score successfully added"
         else:
@@ -197,6 +226,7 @@ def credit():
 @app.route("/perform_penalties", methods=["POST", "GET"])
 def perform_penalties():
     user_data = None
+    adversary_data = None
     if "user" in session:
         user_name = session["user"]
         user_data = users_scores.query.filter_by(name=user_name).first()
@@ -214,12 +244,14 @@ def perform_penalties():
             team = request.form["team"]
             users = users_scores.query.filter_by(team=team).all()
             if users:
-                adversary = random.choice(users)
+                adversary_data = random.choice(users)
+                adversary = adversary_data.name
             else :
                 flash("No one belong to this team")
                 return redirect(url_for("home"))
         else :
             adversary = request.form["adversary"]
+            adversary_data = users_scores.query.filter_by(name=adversary).first()
 
         proxy_url = "http://localhost:3000/sendMessage/"
         headers = {"Content-Type": "application/json"}
@@ -237,8 +269,11 @@ def perform_penalties():
 
             # General
             case "Get half his credit":
-                # TODO 
-                print("Not implemented yet")
+                user_data.credit  += adversary_data.credit // 2
+                db.session.commit()
+                adversary_data.credit = adversary_data.credit // 2
+                db.session.commit()
+                return redirect(url_for("home"))
             case "See score board":
                 session['penalties_performed'] = True
                 return redirect(url_for("secret_score_board"))
@@ -313,27 +348,78 @@ def add_header(response):
 
 @app.route('/pyoupyou')
 def pyoupyou():
-    return render_template("game_template.html", connected="user" in session)
+    if "user" in session :
+        game_user = session["user"]
+        game_user_data = new_scores.query.filter_by(name=game_user).first()
+        if game_user_data:
+            if  game_user_data.pyoupyou_times_play >= 5:
+                flash("Stop playing, go back to work NOW")
+                return redirect(url_for("home"))
+        return render_template("game_template.html", connected="user" in session)
+    else :
+        flash("Please login first")
+        return redirect(url_for("login"))
 
-game_score = 0
 @app.route('/get_score', methods=['GET'])
 def get_score():
-    global game_score
-    print("sending score:", game_score)
-    return jsonify({"result": game_score})
+    game_user = session["user"]
+    game_user_data = new_scores.query.filter_by(name=game_user).first()
+    if game_user_data:
+        print("sending pyoupyou_score:", game_user_data.pyoupyou_best_score)
+        return jsonify({"result": game_user_data.pyoupyou_best_score})
+    return None
 
 @app.route('/receive_score', methods=['POST'])
 def receive_score():
-    global game_score
     data = request.get_json()
-    if 'score' in data:
-        print("Received score:", game_score)
-        game_score = max(data['score'], game_score)
+    if 'pyoupyou_score' in data:
+        game_score = data['pyoupyou_score']
+        print("Received pyoupyou_score:", game_score)
+        game_user = session["user"]
+        game_user_data = new_scores.query.filter_by(name=game_user).first()
+        if game_user_data :
+            if game_user_data.pyoupyou_score < game_score :
+                game_user_data.pyoupyou_score = game_score
+                db.session.commit()
+            if game_user_data.pyoupyou_best_score < game_score :
+                game_user_data.pyoupyou_best_score = game_score
+                db.session.commit()
+            game_user_data.pyoupyou_times_play += 1
+            db.session.commit()
+        else :
+            user_team = users_scores.query.filter_by(name=game_user).first().team
+            nw_scr = new_scores(game_user, user_team, game_score, game_score, 1)
+            db.session.add(nw_scr)
+            db.session.commit()
         return "Score received successfully!", 200
     else:
         return "Score data not found in request", 400
 
+@app.route('/add_credit', methods=['POST'])
+def add_score():
+    with app.app_context():
+        contestants = new_scores.query.all()
+        for contestant in contestants :
+            user = contestant.name
+            credit_to_add = contestant.pyoupyou_score
+            contestant.pyoupyou_score = 0
+            db.session.commit()
+            contestant.pyoupyou_times_play = 0
+            db.session.commit()
+            user_data = users_scores.query.filter_by(name=user).first()
+            if user_data:
+                user_data.credit += credit_to_add
+                db.session.commit()
+                return "Score successfully added"
+            else:
+                return "No user named " + current_user
+
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()
+        # add the score once a day
+        scheduler = BackgroundScheduler()
+        scheduler.start()
+        scheduler.add_job(add_score, 'interval', days=1)
+        #scheduler.add_job(add_score, 'interval', seconds=10)
     app.run()
