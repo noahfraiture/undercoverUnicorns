@@ -1,0 +1,6 @@
+
+Export Project :
+https://docs.godotengine.org/en/stable/tutorials/export/exporting_for_web.html
+
+Upload Project :
+https://www.youtube.com/watch?v=XA1Ei7kyp6I

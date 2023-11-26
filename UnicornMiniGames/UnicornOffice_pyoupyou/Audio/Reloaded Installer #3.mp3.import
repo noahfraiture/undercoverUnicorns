@@ -1,0 +1,19 @@
+[remap]
+
+importer="mp3"
+type="AudioStreamMP3"
+uid="uid://fqto7l6qx5et"
+path="res://.godot/imported/Reloaded Installer #3.mp3-6575376afa319dcfc747acd3b18af215.mp3str"
+
+[deps]
+
+source_file="res://Audio/Reloaded Installer #3.mp3"
+dest_files=["res://.godot/imported/Reloaded Installer #3.mp3-6575376afa319dcfc747acd3b18af215.mp3str"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4
