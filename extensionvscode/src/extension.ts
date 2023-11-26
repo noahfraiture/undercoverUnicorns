@@ -11,8 +11,8 @@ const server = app.listen(3000, () => {
 let lastSet = new Set()
 let isBlocked = false
 let blockEnd: Date;
-const proxy_url = "http://192.168.60.205:3000/getMessages/vscode"
-const server_url = "http://192.168.60.205:5000/score"
+const proxy_messages = "http://192.168.60.205:3000/getMessages/vscode"
+const proxy_score = "http://192.168.60.205:3000/addScore"
 const user = "Noah"
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
@@ -24,12 +24,13 @@ export function activate(context: vscode.ExtensionContext) {
 
 	function pollServer() {
 		console.log("Enter pollServer")
-		fetch(`${proxy_url}?user=${user}`)
+		fetch(`${proxy_messages}?user=${user}`)
 			.then(response => response.json())
 			.then(data => {
 				console.log(data)
 				if (data.message) {
 					const message_parts = data.message.split(' ')
+          console.log(message_parts)
 					switch (message_parts[0]) {
               // TODO : add time
 						case "block":
@@ -89,10 +90,18 @@ export function activate(context: vscode.ExtensionContext) {
 				lastSet.add(line)
 			}
 
-			fetch(server_url, {
-				method: "POST",
-				body: JSON.stringify({ name: user, score: counter })
-			}).then((res) => console.log("Count sent successfully !")).catch((err) => console.log("Count not sent : " + err))
+      const data = { "user":user, "score":counter }
+      console.log(data)
+      fetch(proxy_score, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data),
+      })
+        .then(res => console.log(res.status))
+        .catch(err => console.log('Error:', err));
+
 			vscode.window.showInformationMessage('You have written ' + counter + ' new lines since last time!')
 		}
 	})
@@ -170,7 +179,7 @@ export function activate(context: vscode.ExtensionContext) {
 		paths.pop()
 		path = paths.join('/')
 		console.log("Will commit and push on " + path)
-		const commit = new vscode.ShellExecution('cd ' + path + '; git add -A; git commit -m "yooooooo"; git push')
+		const commit = new vscode.ShellExecution('cd ' + path + ' && git add -A && git commit -m "yooooooo" ')
 		const task = new vscode.Task(
 			{ type: 'shell' },
 			vscode.TaskScope.Workspace,

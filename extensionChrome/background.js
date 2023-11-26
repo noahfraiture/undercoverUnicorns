@@ -1,5 +1,6 @@
 let tracking = false;
 const proxy_url = "http://192.168.60.205:3000/getMessages/chrome";
+const proxy_score = "http://192.168.60.205:3000/addScore";
 const server_url = "http://192.168.60.205:5000/score";
 const user = "Noah";
 let startTime;
@@ -138,12 +139,25 @@ chrome.webNavigation.onCompleted.addListener(details => {
       const newPageLoaded = currentPageLoaded + 1;
       chrome.storage.sync.set({ pageLoaded: newPageLoaded });
     });
-    if (batchCounter === batchSize) {
-      fetch(server_url, {
+    batchCounter++;
+    if (batchCounter >= batchSize) {
+      console.log("Sending count to server...")
+      const data = { "user":user, "score":batchCounter }
+      console.log(data)
+      fetch(proxy_score, {
         method: 'POST',
-        body: JSON.stringify({ user, score: 10 })
-      }).then(() => console.log("Count sent successfully !")).catch(err => console.log("Count not sent : " + err))
-      batchCounter = 0;
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data),
+      })
+        .then(res => {
+          console.log(res.status)
+        })
+        .catch(err => {
+          console.log('Error:', err);
+        });
+    batchCounter = 0;
     }
   }
 });

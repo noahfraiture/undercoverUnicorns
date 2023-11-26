@@ -10,9 +10,20 @@ app.permanent_session_lifetime = timedelta(days=1)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///usersscores.sqlite3'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] =False
 db = SQLAlchemy(app)
-penalties = {"Get half his credit": 200, "See score board": 20, "Inputs block box": 35, "Move cursor randomly":40,
-                     "Push commit": 150, "Kill random navigation tab": 60, "Refresh his tab" : 25,
-                     "Destroy his navigation page": 40, "Change his current tab": 35}
+
+penalties = {
+    "Get half his credit": 200, 
+    "See score board": 20,
+    "VsCode : Keep your eyes open": 100,
+    "VsCode : Inputs block box": 35,
+    "VsCode : Move cursor randomly":40,
+    "VsCode : Push commit": 150,
+    "Chromium : Kill random navigation tab": 60,
+    "Chromium : Refresh his tab" : 25,
+    "Chromium : Destroy his navigation page": 40,
+    "Chromium : Change his current tab": 35,
+    "Chromium : Open a SUPER tab": 20
+}
 
 class users_scores(db.Model):
     _id = db.Column("id", db.Integer, primary_key=True)
@@ -140,7 +151,7 @@ def score():
             db.session.commit()
             team_data = teams_scores.query.filter_by(team_name=user_data.team).first()
             if team_data:
-                team_data.team_score += score
+                team_data.team_score += score_to_add
                 db.session.commit()
             return "Score successfully added"
         else:
@@ -213,6 +224,7 @@ def perform_penalties():
         proxy_url = "http://localhost:3000/sendMessage/"
         headers = {"Content-Type": "application/json"}
 
+        print(request.form)
         penalty = request.form["penalty"]
         price = penalties[penalty]
         if credit < price:
@@ -223,24 +235,46 @@ def perform_penalties():
             db.session.commit()
 
         match penalty:
+
+            # General
+            case "Get half his credit":
+                # TODO 
+                print("Not implemented yet")
             case "See score board":
                 session['penalties_performed'] = True
                 return redirect(url_for("secret_score_board"))
-            case "Kill random navigation tab":
+
+            # VSCode
+            case "VsCode : Keep your eyes open":
+                data = {"message": "camera", "user": adversary}
+                return check(requests.post(proxy_url + "vscode", headers=headers, json=data))
+            case "VsCode : Inputs block box":
+                data = {"message": "block", "user": adversary}
+                return check(requests.post(proxy_url + "vscode", headers=headers, json=data))
+            case "VsCode : Move cursor randomly":
+                data = {"message": "move", "user": adversary}
+                return check(requests.post(proxy_url + "vscode", headers=headers, json=data))
+            case "VsCode : Push commit":
+                data = {"message": "git", "user": adversary}
+                return check(requests.post(proxy_url + "vscode", headers=headers, json=data))
+
+            # Chrome
+            case "Chromium : Kill random navigation tab":
                 data = {"message": "killRandomTab 1", "user": adversary}
                 return check(requests.post(proxy_url + "chrome", headers=headers, json=data))
-            case "Destroy his navigation page":
+            case "Chromium : Refresh his tab":
+                data = {"message": "refreshTab", "user": adversary}
+                return check(requests.post(proxy_url + "chrome", headers=headers, json=data))
+            case "Chromium : Destroy his navigation page":
                 data = {"message": "destroy 1", "user": adversary}
                 return check(requests.post(proxy_url + "chrome", headers=headers, json=data))
-            case "Open a new tab":
+            case "Chromium : Change his current tab":
+                data = {"message": "changeTab", "user": adversary} # TODO : change name here and in the proxy
+                return check(requests.post(proxy_url + "chrome", headers=headers, json=data))
+            case "Chromium : Open a SUPER tab":
                 data = {"message": "openNewTab https://www.decisionproblem.com/paperclips/", "user": adversary}
                 return check(requests.post(proxy_url + "chrome", headers=headers, json=data))
-            case "Refresh his tab":
-                data = {"message": "refresh", "user": adversary}
-                return check(requests.post(proxy_url + "chrome", headers=headers, json=data))
-            case "Change his current tab":
-                data = {"message": "focusFirst", "user": adversary} # TODO : change name here and in the proxy
-                return check(requests.post(proxy_url + "chrome", headers=headers, json=data))
+
             case _:
                 print("Invalid penalty")
 
@@ -257,8 +291,6 @@ def check(response):
 
 def creat_user(users):
     for user, team in users :
-        print(team)
-        print(user)
         score = random.randint(0, 250)
         credit = random.randint(0, 250)
         usr = users_scores(user, score, credit, team)
