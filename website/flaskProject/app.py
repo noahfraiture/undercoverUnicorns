@@ -344,7 +344,10 @@ def pyoupyou():
             if  game_user_data.times_play >= 5:
                 flash("Stop playing, go back to work NOW")
                 return redirect(url_for("home"))
-    return render_template("game_template.html", connected="user" in session)
+        return render_template("game_template.html", connected="user" in session)
+    else :
+        flash("Please login first")
+        return redirect(url_for("login"))
 
 @app.route('/get_score', methods=['GET'])
 def get_score():
