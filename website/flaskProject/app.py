@@ -176,7 +176,7 @@ def score():
             return "Invalid request format. Make sure to include 'user' and 'score' in the JSON data."
         user_data = users_scores.query.filter_by(name=current_user).first()
         if user_data:
-            user_data.pyoupyou_score += score_to_add
+            user_data.score += score_to_add
             db.session.commit()
             team_data = teams_scores.query.filter_by(team_name=user_data.team).first()
             if team_data:
@@ -417,10 +417,14 @@ def add_score():
         contestants = new_scores.query.all()
         for contestant in contestants :
             user = contestant.name
-            credit_to_add = contestant.pyoupyou_score
+            credit_to_add = contestant.pyoupyou_score + contestant.platformer_score
             contestant.pyoupyou_score = 0
             db.session.commit()
+            contestant.platformer_score = 0
+            db.session.commit()
             contestant.pyoupyou_times_play = 0
+            db.session.commit()
+            contestant.platformer_times_play = 0
             db.session.commit()
             user_data = users_scores.query.filter_by(name=user).first()
             if user_data:
