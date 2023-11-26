@@ -1,4 +1,4 @@
-[gd_scene load_steps=13 format=3 uid="uid://bw62234ecx5gx"]
+[gd_scene load_steps=14 format=3 uid="uid://bw62234ecx5gx"]
 
 [ext_resource type="Script" path="res://level.gd" id="1_474tr"]
 [ext_resource type="PackedScene" uid="uid://b0ctjo5f28eyy" path="res://scenes/player.tscn" id="1_gbef3"]
@@ -10,6 +10,7 @@
 [ext_resource type="Texture2D" uid="uid://d1hrryw77knby" path="res://sprites/AspriteCdeLaMerde.PNG" id="8_op4u5"]
 [ext_resource type="PackedScene" uid="uid://byv7p71hj1wca" path="res://scenes/obstacles.tscn" id="9_lea3r"]
 [ext_resource type="AudioStream" uid="uid://fqto7l6qx5et" path="res://Audio/Reloaded Installer #3.mp3" id="10_usrio"]
+[ext_resource type="Script" path="res://ScoreLabel.gd" id="11_x5bf0"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_bqfdx"]
 texture = ExtResource("8_op4u5")
@@ -2948,6 +2949,14 @@ layer_1/tile_data = PackedInt32Array(4521993, 6094848, 37, 4587529, 6094848, 38,
 stream = ExtResource("10_usrio")
 volume_db = -8.892
 autoplay = true
+
+[node name="ScoreLabel" type="Label" parent="."]
+offset_left = 1049.0
+offset_top = 19.0
+offset_right = 1151.0
+offset_bottom = 53.0
+text = "Score : 0"
+script = ExtResource("11_x5bf0")
 
 [connection signal="destroyed" from="Player" to="." method="_on_player_destroyed"]
 [connection signal="projectile_fire" from="Player" to="projectile_factory" method="spawn_projectile"]
