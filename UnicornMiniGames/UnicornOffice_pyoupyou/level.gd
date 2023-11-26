@@ -44,19 +44,18 @@ func spawn_asteroid():
 	if asteroid.chosenSize == 1:
 		asteroid.scale = Vector2(1.8, 1.8)
 		asteroid.speed = 190.0
-	asteroid.destroyed.connect(_on_asteroid_destroyed.bind(asteroid))
+	asteroid.destroyed.connect($ScoreLabel._on_asteroid_destroyed.bind(asteroid))
 
 
 func _input(event):
 	if event.is_action_pressed("spawn"):
 		spawn_asteroid()
 
-func _on_asteroid_destroyed(asteroid):
-	pass # Calculer les points si asteroid.is_destroyed == 1.0
-
 func _on_spawn_timer_timeout():
 	spawn_asteroid()
 
 
 func _on_player_destroyed():
+	print("Good game : score %s" % $ScoreLabel.score)
 	get_tree().reload_current_scene() # Restart game
+
