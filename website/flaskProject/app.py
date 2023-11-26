@@ -3,6 +3,8 @@ from datetime import timedelta
 from flask_sqlalchemy import SQLAlchemy
 import requests
 import random
+from apscheduler.schedulers.background import BackgroundScheduler
+
 
 app = Flask(__name__, static_url_path='/static', static_folder='static')
 app.secret_key = "IDontKnowWhatKindOfKeyToPut"
@@ -46,6 +48,21 @@ class teams_scores(db.Model):
     def __init__(self, team_name, team_score):
         self.team_name = team_name
         self.team_score = team_score
+
+class new_scores(db.Model):
+    _id = db.Column("id", db.Integer, primary_key=True)
+    name = db.Column("name", db.String(100))
+    team = db.Column("team", db.String(100))
+    score = db.Column("score", db.Integer)
+    best_score = db.Column("best_score", db.Integer)
+    times_play = db.Column("times_play", db.Integer)
+
+    def __init__(self, name, team, score, best_score, times_play):
+        self.name = name
+        self.team = team
+        self.score = score
+        self.best_score = best_score
+        self.times_play = times_play
 
 
 @app.route('/')
@@ -180,7 +197,7 @@ def credit():
             db.session.commit()
             team_data = teams_scores.query.filter_by(team_name=user_data.team).first()
             if team_data:
-                team_data.team_score += score
+                team_data.team_score += credit_to_add
                 db.session.commit()
             return "Score successfully added"
         else:
@@ -316,25 +333,64 @@ def add_header(response):
 def pyoupyou():
     return render_template("game_template.html", connected="user" in session)
 
-game_score = 0
 @app.route('/get_score', methods=['GET'])
 def get_score():
-    global game_score
-    print("sending score:", game_score)
-    return jsonify({"result": game_score})
+    game_user = session["user"]
+    game_user_data = new_scores.query.filter_by(name=game_user).first()
+    if game_user_data:
+        print("sending score:", game_user_data.best_score)
+        return jsonify({"result": game_user_data.best_score})
+    return None
 
 @app.route('/receive_score', methods=['POST'])
 def receive_score():
-    global game_score
     data = request.get_json()
     if 'score' in data:
+        game_score = data['score']
         print("Received score:", game_score)
-        game_score = max(data['score'], game_score)
+        game_user = session["user"]
+        game_user_data = new_scores.query.filter_by(name=game_user).first()
+        if game_user_data :
+            if game_user_data.score < game_score :
+                game_user_data.score = game_score
+                db.session.commit()
+            if game_user_data.best_score < game_score :
+                game_user_data.best_score = game_score
+                db.session.commit()
+        else :
+            user_team = users_scores.query.filter_by(name=game_user).first().team
+            nw_scr = new_scores(game_user, user_team, game_score, game_score, 1)
+            db.session.add(nw_scr)
+            db.session.commit()
         return "Score received successfully!", 200
     else:
         return "Score data not found in request", 400
 
+@app.route('/add_credit', methods=['POST'])
+def add_score():
+    with app.app_context():
+        contestants = new_scores.query.all()
+        for contestant in contestants :
+            user = contestant.name
+            credit_to_add = contestant.score
+            contestant.score = 0
+            db.session.commit()
+            contestant.times_play = 0
+            db.session.commit()
+            user_data = users_scores.query.filter_by(name=user).first()
+            if user_data:
+                user_data.credit += credit_to_add
+                db.session.commit()
+                return "Score successfully added"
+            else:
+                return "No user named " + current_user
+
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()
+        # add the score once a day
+        scheduler = BackgroundScheduler()
+        scheduler.start()
+        scheduler.add_job(add_score, 'interval', days=1)
+        #scheduler.add_job(add_score, 'interval', seconds=10)
     app.run()
