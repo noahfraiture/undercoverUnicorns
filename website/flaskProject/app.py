@@ -83,7 +83,7 @@ def home():
             credit = 0
         contestants = users_scores.query.all()
         teams = teams_scores.query.all()
-        return render_template("home.html", user_name=user_name, score=score, credit=credit, contestants=contestants, teams=teams, penalties=penalties, connected="user" in session)
+        return render_template("home.html", user_name=user_name, score=score, credit=credit, contestants=contestants, teams=teams, penalties=penalties, connected="user" in session, score_board = "penalties_performed" in session)
     else:
         flash("Please login first")
         return redirect(url_for("login"))
@@ -93,7 +93,7 @@ def home():
 def secret_score_board():
     if session.get('penalties_performed'):
         contestants = users_scores.query.order_by(users_scores.score.desc()).all()
-        return render_template("secret_scoreboard.html", contestants=contestants, connected="user" in session)
+        return render_template("secret_scoreboard.html", contestants=contestants, connected="user" in session, score_board = "penalties_performed" in session)
     else:
         flash("Nice try !")
         return redirect(url_for("home"))
@@ -102,7 +102,7 @@ def secret_score_board():
 def team_scoreboard():
     if "user" in session :
         teams = teams_scores.query.all()
-        return render_template('teams_scoreboard.html', teams=teams, connected="user" in session)
+        return render_template('teams_scoreboard.html', teams=teams, connected="user" in session, score_board = "penalties_performed" in session)
     else :
         flash("Please login first")
         return redirect(url_for("login"))
@@ -123,14 +123,14 @@ def login():
             session.pop("user", None)
             session.pop("score", None)
             session.pop("credit", None)
-            return render_template("login.html", connected="user" in session)
+            return render_template("login.html", connected="user" in session, score_board = "penalties_performed" in session)
         flash("Succesfully logged in", "info")
         return redirect(url_for("home"))
     else:
         if "user" in session:
             flash("Already logged in", "info")
             return redirect(url_for("home"))
-        return render_template("login.html", connected="user" in session)
+        return render_template("login.html", connected="user" in session, score_board = "penalties_performed" in session)
 
 @app.route("/logout")
 def logout():
@@ -154,7 +154,7 @@ def team_distribution():
             if user.team not in user_teams:
                 user_teams[user.team] = []
             user_teams[user.team].append(user)
-        return render_template("teams.html", user_teams=user_teams, teams=teams, connected="user" in session)
+        return render_template("teams.html", user_teams=user_teams, teams=teams, connected="user" in session, score_board = "penalties_performed" in session)
     else:
         flash("Please login first")
         return redirect(url_for("login"))
@@ -162,7 +162,7 @@ def team_distribution():
 @app.route('/penalty_prices')
 def prices():
     sorted_penalties = dict(sorted(penalties.items(), key=lambda item: item[1]))
-    return render_template('prices.html', penalties=sorted_penalties, connected="user" in session)
+    return render_template('prices.html', penalties=sorted_penalties, connected="user" in session, score_board = "penalties_performed" in session)
 
 
 @app.route("/score", methods=["POST", "GET"])
@@ -327,7 +327,7 @@ def check(response):
 def creat_user(users):
     for user, team in users :
         score = random.randint(0, 250)
-        credit = random.randint(0, 250)
+        credit = random.randint(0, 1000)
         usr = users_scores(user, score, credit, team)
         db.session.add(usr)
         db.session.commit()
@@ -356,7 +356,7 @@ def pyoupyou():
             if  game_user_data.pyoupyou_times_play >= 5:
                 flash("Stop playing, go back to work NOW")
                 return redirect(url_for("home"))
-        return render_template("game_template.html", connected="user" in session)
+        return render_template("game_template.html", connected="user" in session, score_board = "penalties_performed" in session)
     else :
         flash("Please login first")
         return redirect(url_for("login"))
