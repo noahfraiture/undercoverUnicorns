@@ -282,7 +282,7 @@ def add_header(response):
 
 @app.route('/pyoupyou')
 def pyoupyou():
-    return render_template("game_template.html")
+    return render_template("game_template.html", connected="user" in session)
 
 
 if __name__ == '__main__':
