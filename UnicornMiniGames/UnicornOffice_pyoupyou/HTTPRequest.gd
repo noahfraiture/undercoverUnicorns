@@ -16,7 +16,7 @@ func _on_request_completed(result, response_code, headers, body):
 		if json_parse_result == OK:
 			var data_received = json.data
 			print(data_received)
-			ScoreLabel.best = max(data_received.result, ScoreLabel.best)
+			ScoreLabel.best = max(data_received.pyoupyou_score, ScoreLabel.best)
 		else:
 			get_parent().ready_to_close.emit()
 	else:

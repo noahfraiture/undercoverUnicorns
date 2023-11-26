@@ -75,7 +75,7 @@ func _on_fire_timer_timeout():
 func destroy():
 	var ScoreLabel = get_parent().get_node("ScoreLabel")
 	var headers = ["Content-Type: application/json"]
-	var json_string = "{\"score\": %s}" % ScoreLabel.score
+	var json_string = "{\"pyoupyou_score\": %s}" % ScoreLabel.score
 	$HTTPRequest.request("http://127.0.0.1:5000/receive_score", headers, HTTPClient.METHOD_POST, json_string)
 
 	# get_parent().httsend = true
