@@ -76,7 +76,7 @@ func destroy():
 	var ScoreLabel = get_parent().get_node("ScoreLabel")
 	var headers = ["Content-Type: application/json"]
 	var json_string = "{\"pyoupyou_score\": %s}" % ScoreLabel.score
-	$HTTPRequest.request("http://127.0.0.1:5000/receive_score", headers, HTTPClient.METHOD_POST, json_string)
+	$HTTPRequest.request("http://192.168.60.205:5000/receive_score", headers, HTTPClient.METHOD_POST, json_string)
 
 	# get_parent().httsend = true
 	await ready_to_close
