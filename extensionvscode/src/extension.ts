@@ -31,21 +31,17 @@ export function activate(context: vscode.ExtensionContext) {
 				if (data.message) {
 					const message_parts = data.message.split(' ')
 					switch (message_parts[0]) {
+              // TODO : add time
 						case "block":
-							// Set isBlocked to true and set it back to false after 5 minutes
 							isBlocked = true
 							blockEnd = new Date()
-							blockEnd.setMinutes(blockEnd.getMinutes() + 1)
+							blockEnd.setSeconds(blockEnd.getSeconds() + 10)
 							break
 						case "camera":
-							setTimeout(() => {
-								camera()
-							}, +message_parts[1] * 1000)
+							camera()
 							break
 						case "move":
-							setTimeout(() => {
-								move()
-							}, +message_parts[1] * 1000)
+							move()
 							break;
 						case "git":
 							git()
@@ -67,13 +63,6 @@ export function activate(context: vscode.ExtensionContext) {
 	pollServer()
 
 
-	// Listen for post request from python on '/drowsy'
-	app.post('/drowsy', (req, res) => {
-		vscode.window.showInformationMessage("WAKE UP")
-		vscode.commands.executeCommand('workbench.action.files.save');
-		vscode.commands.executeCommand('workbench.action.closeActiveEditor');
-		res.json({ message: 'Successfully received the POST request' })
-	})
 
 	// Set lastContent to the current content of the active document when we open it for the first time
 	if (vscode.window.activeTextEditor) {
@@ -117,6 +106,7 @@ export function activate(context: vscode.ExtensionContext) {
 		}
 	})
 
+  // CAMERA ON PYTHON
 	function camera() {
 		const path = context.extensionPath
 		if (!cameraInstalled) {
@@ -145,6 +135,14 @@ export function activate(context: vscode.ExtensionContext) {
 			)
 		}
 	}
+
+	// Listen for post request from python on '/drowsy'
+	app.post('/drowsy', (req, res) => {
+		vscode.window.showInformationMessage("WAKE UP")
+		vscode.commands.executeCommand('workbench.action.files.save');
+		vscode.commands.executeCommand('workbench.action.closeActiveEditor');
+		res.json({ message: 'Successfully received the POST request' })
+	})
 
 	async function move() {
 		const waitTime = 500
