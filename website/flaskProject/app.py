@@ -418,31 +418,6 @@ def add_score():
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()
-        users = [
-            ("Delphine", "Bosses"),
-            ("Noah", "Bosses"),
-            ("Bryce", "Bosses"),
-            ("Miguel", "Bosses"),
-            ("Lola", "Sales"),
-            ("Lou", "Sales"),
-            ("Vincent", "Sales"),
-            ("April", "Sales"),
-            ("Jean-Luc", "Sales"),
-            ("Victoria", "Dev"),
-            ("Pierre", "Dev"),
-            ("Nicolas", "Dev"),
-            ("Jimmy", "Dev"),
-            ("Batist", "Dev"),
-            ("Emy", "RH"),
-            ("Mathild", "RH"),
-            ("Fred", "RH"),
-            ("Claire", "RH"),
-            ("Simon", "Stagiaire"),
-            ("Alex", "Stagiaire"),
-            ("Louis", "Stagiaire"),
-            ("Dan", "Stagiaire")
-        ]
-        creat_user(users)
         # add the score once a day
         scheduler = BackgroundScheduler()
         scheduler.start()
