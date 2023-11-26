@@ -1,1 +1,6 @@
-Machines à café + petites !
+Pyoupyou:
+- Descendre les Obstacles d'en haut à gauche
+- Changer les tirs en boulettes de papier
+
+Platformer:
+- 

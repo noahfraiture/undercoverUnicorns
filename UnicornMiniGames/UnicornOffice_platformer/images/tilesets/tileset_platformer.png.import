@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://33x2qkwcuknh"
-path="res://.godot/imported/Terrain (16x16).png-f072e8a5f99e915c05031c83401c87a9.ctex"
+uid="uid://b4ovynn1jm5fq"
+path="res://.godot/imported/tileset_platformer.png-7c20f59e3286d3302784b08f49ee80ca.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Terrain (16x16).png"
-dest_files=["res://.godot/imported/Terrain (16x16).png-f072e8a5f99e915c05031c83401c87a9.ctex"]
+source_file="res://images/tilesets/tileset_platformer.png"
+dest_files=["res://.godot/imported/tileset_platformer.png-7c20f59e3286d3302784b08f49ee80ca.ctex"]
 
 [params]
 
