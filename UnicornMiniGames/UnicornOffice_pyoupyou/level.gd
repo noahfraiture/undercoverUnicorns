@@ -56,6 +56,6 @@ func _on_spawn_timer_timeout():
 
 
 func _on_player_destroyed():
-	print("Good game : score %s" % $ScoreLabel.score)
+	print("Good game : best score %s" % $ScoreLabel.score)
 	get_tree().reload_current_scene() # Restart game
 

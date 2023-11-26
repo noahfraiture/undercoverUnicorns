@@ -73,6 +73,9 @@ func _on_fire_timer_timeout():
 
 
 func destroy():
+	var server = get_parent().get_node("HTTPRequest")
+	server.tnext = server.time-1
+	await get_tree().create_timer(0.1).timeout
 	destroyed.emit()
 	queue_free()
 
