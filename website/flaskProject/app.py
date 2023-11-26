@@ -53,17 +53,22 @@ class new_scores(db.Model):
     _id = db.Column("id", db.Integer, primary_key=True)
     name = db.Column("name", db.String(100))
     team = db.Column("team", db.String(100))
-    score = db.Column("score", db.Integer)
-    best_score = db.Column("best_score", db.Integer)
-    times_play = db.Column("times_play", db.Integer)
+    pyoupyou_score = db.Column("pyoupyou_score", db.Integer)
+    pyoupyou_best_score = db.Column("pyoupyou_best_score", db.Integer)
+    pyoupyou_times_play = db.Column("pyoupyou_times_play", db.Integer)
+    platformer_score = db.Column("platformer_score", db.Integer)
+    platformer_best_score = db.Column("platformer_best_score", db.Integer)
+    platformer_times_play = db.Column("platformer_times_play", db.Integer)
 
-    def __init__(self, name, team, score, best_score, times_play):
+    def __init__(self, name, team, pyou_pyouscore, pyoupyou_best_score, pyoupyou_times_play, platformer_score, platformer_best_score, platformer_times_play):
         self.name = name
         self.team = team
-        self.score = score
-        self.best_score = best_score
-        self.times_play = times_play
-
+        self.pyoupyou_score = pyou_pyouscore
+        self.pyoupyou_best_score = pyoupyou_best_score
+        self.pyoupyou_times_play = pyoupyou_times_play
+        self.platformer_score = platformer_score
+        self.platformer_best_score = platformer_best_score
+        self.platformer_times_play = platformer_times_play
 
 @app.route('/')
 def home():
@@ -95,8 +100,12 @@ def secret_score_board():
 
 @app.route('/team_scoreboard')
 def team_scoreboard():
-    teams = teams_scores.query.all()
-    return render_template('teams_scoreboard.html', teams=teams, connected="user" in session)
+    if "user" in session :
+        teams = teams_scores.query.all()
+        return render_template('teams_scoreboard.html', teams=teams, connected="user" in session)
+    else :
+        flash("Please login first")
+        return redirect(url_for("login"))
 
 
 @app.route('/login', methods=["POST", "GET"])
@@ -167,7 +176,7 @@ def score():
             return "Invalid request format. Make sure to include 'user' and 'score' in the JSON data."
         user_data = users_scores.query.filter_by(name=current_user).first()
         if user_data:
-            user_data.score += score_to_add
+            user_data.pyoupyou_score += score_to_add
             db.session.commit()
             team_data = teams_scores.query.filter_by(team_name=user_data.team).first()
             if team_data:
@@ -344,7 +353,7 @@ def pyoupyou():
         game_user = session["user"]
         game_user_data = new_scores.query.filter_by(name=game_user).first()
         if game_user_data:
-            if  game_user_data.times_play >= 5:
+            if  game_user_data.pyoupyou_times_play >= 5:
                 flash("Stop playing, go back to work NOW")
                 return redirect(url_for("home"))
         return render_template("game_template.html", connected="user" in session)
@@ -357,26 +366,26 @@ def get_score():
     game_user = session["user"]
     game_user_data = new_scores.query.filter_by(name=game_user).first()
     if game_user_data:
-        print("sending score:", game_user_data.best_score)
-        return jsonify({"result": game_user_data.best_score})
+        print("sending pyoupyou_score:", game_user_data.pyoupyou_best_score)
+        return jsonify({"result": game_user_data.pyoupyou_best_score})
     return None
 
 @app.route('/receive_score', methods=['POST'])
 def receive_score():
     data = request.get_json()
-    if 'score' in data:
-        game_score = data['score']
-        print("Received score:", game_score)
+    if 'pyoupyou_score' in data:
+        game_score = data['pyoupyou_score']
+        print("Received pyoupyou_score:", game_score)
         game_user = session["user"]
         game_user_data = new_scores.query.filter_by(name=game_user).first()
         if game_user_data :
-            if game_user_data.score < game_score :
-                game_user_data.score = game_score
+            if game_user_data.pyoupyou_score < game_score :
+                game_user_data.pyoupyou_score = game_score
                 db.session.commit()
-            if game_user_data.best_score < game_score :
-                game_user_data.best_score = game_score
+            if game_user_data.pyoupyou_best_score < game_score :
+                game_user_data.pyoupyou_best_score = game_score
                 db.session.commit()
-            game_user_data.times_play += 1
+            game_user_data.pyoupyou_times_play += 1
             db.session.commit()
         else :
             user_team = users_scores.query.filter_by(name=game_user).first().team
@@ -393,10 +402,10 @@ def add_score():
         contestants = new_scores.query.all()
         for contestant in contestants :
             user = contestant.name
-            credit_to_add = contestant.score
-            contestant.score = 0
+            credit_to_add = contestant.pyoupyou_score
+            contestant.pyoupyou_score = 0
             db.session.commit()
-            contestant.times_play = 0
+            contestant.pyoupyou_times_play = 0
             db.session.commit()
             user_data = users_scores.query.filter_by(name=user).first()
             if user_data:
@@ -409,6 +418,31 @@ def add_score():
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()
+        users = [
+            ("Delphine", "Bosses"),
+            ("Noah", "Bosses"),
+            ("Bryce", "Bosses"),
+            ("Miguel", "Bosses"),
+            ("Lola", "Sales"),
+            ("Lou", "Sales"),
+            ("Vincent", "Sales"),
+            ("April", "Sales"),
+            ("Jean-Luc", "Sales"),
+            ("Victoria", "Dev"),
+            ("Pierre", "Dev"),
+            ("Nicolas", "Dev"),
+            ("Jimmy", "Dev"),
+            ("Batist", "Dev"),
+            ("Emy", "RH"),
+            ("Mathild", "RH"),
+            ("Fred", "RH"),
+            ("Claire", "RH"),
+            ("Simon", "Stagiaire"),
+            ("Alex", "Stagiaire"),
+            ("Louis", "Stagiaire"),
+            ("Dan", "Stagiaire")
+        ]
+        creat_user(users)
         # add the score once a day
         scheduler = BackgroundScheduler()
         scheduler.start()
