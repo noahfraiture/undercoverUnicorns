@@ -111,6 +111,9 @@ def login():
             session["credit"] = user_data.credit
         else :
             flash(f"No user named {user}")
+            session.pop("user", None)
+            session.pop("score", None)
+            session.pop("credit", None)
             return render_template("login.html", connected="user" in session)
         flash("Succesfully logged in", "info")
         return redirect(url_for("home"))
